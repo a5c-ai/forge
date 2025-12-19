@@ -1,0 +1,6 @@
+{
+  "schema": "a5cforge/v1",
+  "inboxRefs": ["refs/a5c/inbox/a", "refs/a5c/inbox/b"]
+}
+
+

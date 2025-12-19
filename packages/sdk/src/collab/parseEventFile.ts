@@ -38,7 +38,24 @@ export function parseEventFileBytes(filePath: string, bytes: Buffer): A5cEventBa
     }
     return event;
   }
+  if (filePath.endsWith(".ndjson")) {
+    // A bundle contains one JSON object per line.
+    // This function returns the FIRST event for backward-compat; use parseEventFileBytesMany to get all.
+    const raw = bytes.toString("utf8");
+    const line = raw.split(/\r?\n/).find((l) => l.trim().length > 0);
+    if (!line) throw new Error(`Empty ndjson bundle: ${filePath}`);
+    return JSON.parse(line);
+  }
   throw new Error(`Unsupported event file extension: ${filePath}`);
+}
+
+export function parseEventFileBytesMany(filePath: string, bytes: Buffer): A5cEventBase[] {
+  if (filePath.endsWith(".ndjson")) {
+    const raw = bytes.toString("utf8");
+    const lines = raw.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+    return lines.map((l) => JSON.parse(l));
+  }
+  return [parseEventFileBytes(filePath, bytes)];
 }
 
 

@@ -30,6 +30,8 @@ export async function loadInboxSnapshot(opts: { git: IGit; inboxRef: string }): 
   const commitOid = await opts.git.revParse(opts.inboxRef);
   const events: ParsedEventFile[] = [];
   await walkTree(opts.git, commitOid, ".collab", async (p) => {
+    // Exclude non-event config files.
+    if (p === ".collab/discovery.json" || p.endsWith("/discovery.json")) return;
     if (!(p.endsWith(".json") || p.endsWith(".md"))) return;
     const bytes = await opts.git.readBlob(commitOid, p);
     const event = parseEventFileBytes(p, bytes);

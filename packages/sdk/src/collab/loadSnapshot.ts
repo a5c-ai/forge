@@ -1,8 +1,9 @@
 import type { IGit } from "../git/IGit.js";
 import type { ParsedEventFile } from "./eventTypes.js";
-import { parseEventFileBytes } from "./parseEventFile.js";
+import { parseEventFileBytes, parseEventFileBytesMany } from "./parseEventFile.js";
 import { compareEventFilesByPath } from "./eventKey.js";
 import { loadInboxSnapshot } from "./loadInbox.js";
+import { loadDiscoveryConfig } from "./discovery.js";
 
 export type Snapshot = {
   treeish: string;
@@ -11,6 +12,9 @@ export type Snapshot = {
   inbox?: {
     refs: string[];
     events: ParsedEventFile[];
+  };
+  discovery?: {
+    inboxRefs?: string[];
   };
 };
 
@@ -37,26 +41,35 @@ export async function loadSnapshot(opts: { git: IGit; treeish: string; inboxRefs
 
   // Scan `.collab/**` in the commit tree.
   await walkTree(opts.git, commitOid, ".collab", async (p) => {
-    if (!(p.endsWith(".json") || p.endsWith(".md"))) return;
+    // Exclude non-event config files.
+    if (p === ".collab/discovery.json" || p.endsWith("/discovery.json")) return;
+    if (!(p.endsWith(".json") || p.endsWith(".md") || p.endsWith(".ndjson"))) return;
     const bytes = await opts.git.readBlob(commitOid, p);
-    const event = parseEventFileBytes(p, bytes);
-    events.push({ path: p, kind: event.kind, event });
+    const evs = p.endsWith(".ndjson") ? parseEventFileBytesMany(p, bytes) : [parseEventFileBytes(p, bytes)];
+    for (let i = 0; i < evs.length; i++) {
+      const event = evs[i]!;
+      const ep = p.endsWith(".ndjson") ? `${p}::${i}` : p;
+      events.push({ path: ep, kind: event.kind, event });
+    }
   });
 
   events.sort((a, b) => compareEventFilesByPath(a.path, b.path));
 
+  const discoveryCfg = await loadDiscoveryConfig({ git: opts.git, commitOid });
+  const resolvedInboxRefs = (opts.inboxRefs && opts.inboxRefs.length > 0 ? opts.inboxRefs : discoveryCfg?.inboxRefs) ?? [];
+
   let inbox: Snapshot["inbox"];
-  if (opts.inboxRefs && opts.inboxRefs.length > 0) {
+  if (resolvedInboxRefs.length > 0) {
     const inboxEvents: ParsedEventFile[] = [];
-    for (const ref of opts.inboxRefs) {
+    for (const ref of resolvedInboxRefs) {
       const inboxSnap = await loadInboxSnapshot({ git: opts.git, inboxRef: ref });
       inboxEvents.push(...inboxSnap.collabEvents);
     }
     inboxEvents.sort((a, b) => compareEventFilesByPath(a.path, b.path));
-    inbox = { refs: [...opts.inboxRefs], events: inboxEvents };
+    inbox = { refs: [...resolvedInboxRefs], events: inboxEvents };
   }
 
-  return { treeish: opts.treeish, commitOid, collabEvents: events, inbox };
+  return { treeish: opts.treeish, commitOid, collabEvents: events, inbox, discovery: { inboxRefs: discoveryCfg?.inboxRefs } };
 }
 
 

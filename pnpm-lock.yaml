@@ -23,6 +23,9 @@ importers:
 
   packages/spec-tests:
     devDependencies:
+      '@a5cforge/sdk':
+        specifier: workspace:*
+        version: link:../sdk
       ajv:
         specifier: ^8.17.1
         version: 8.17.1

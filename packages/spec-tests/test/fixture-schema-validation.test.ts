@@ -47,6 +47,11 @@ function isCollabEventPath(p: string): boolean {
   return normalized.includes("/.collab/");
 }
 
+function isCollabConfigPath(p: string): boolean {
+  const normalized = p.split(path.sep).join("/");
+  return normalized.endsWith("/.collab/discovery.json") || normalized.includes("/.collab/") && normalized.endsWith("/discovery.json");
+}
+
 function assertEventFilenameGrammar(filePath: string) {
   // Minimal Phase-1 grammar: filename begins with a numeric ms timestamp and contains kind suffix.
   // Example: `1734628200000_alice_0001.issue.event.created.json`
@@ -115,6 +120,7 @@ describe("Phase 1 - fixture schema validation", () => {
 
     for (const filePath of collabFiles) {
       if (!isCollabEventPath(filePath)) continue;
+      if (isCollabConfigPath(filePath)) continue;
 
       assertEventFilenameGrammar(filePath);
       assertEventPathGrammar(filePath);

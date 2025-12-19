@@ -71,7 +71,8 @@ describe("multi-inbox (integration)", () => {
     await run("git", ["checkout", "-q", "main"], dir);
 
     const repo = await openRepo(dir);
-    const snap = await loadSnapshot({ git: repo.git, treeish: "HEAD", inboxRefs: ["refs/a5c/inbox/a", "refs/a5c/inbox/b"] });
+    // No inboxRefs passed: should be discovered via `.collab/discovery.json` in the base snapshot.
+    const snap = await loadSnapshot({ git: repo.git, treeish: "HEAD" });
     const pr = renderPR(snap, "pr-1");
     expect(pr).toBeTruthy();
     // Deterministic: proposal A wins because actor "alice" sorts before "bob" at same time.

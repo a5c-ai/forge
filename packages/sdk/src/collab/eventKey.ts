@@ -20,8 +20,13 @@ export function parseEventKeyFromFilename(filename: string): EventKeyParts {
 export function compareEventFilesByPath(aPath: string, bPath: string): number {
   // Deterministic ordering by filename (Phase 2 baseline). We sort by:
   //   tsMs asc, actor asc, nonce asc, kind asc, then full path lexicographically.
-  const aBase = aPath.split("/").pop() ?? aPath;
-  const bBase = bPath.split("/").pop() ?? bPath;
+  const [aFile, aIdxRaw] = aPath.split("::");
+  const [bFile, bIdxRaw] = bPath.split("::");
+  const aIdx = aIdxRaw ? Number(aIdxRaw) : undefined;
+  const bIdx = bIdxRaw ? Number(bIdxRaw) : undefined;
+
+  const aBase = (aFile.split("/").pop() ?? aFile) as string;
+  const bBase = (bFile.split("/").pop() ?? bFile) as string;
   const a = parseEventKeyFromFilename(aBase);
   const b = parseEventKeyFromFilename(bBase);
 
@@ -29,6 +34,9 @@ export function compareEventFilesByPath(aPath: string, bPath: string): number {
   if (a.actor !== b.actor) return a.actor < b.actor ? -1 : 1;
   if (a.nonce !== b.nonce) return a.nonce < b.nonce ? -1 : 1;
   if (a.kind !== b.kind) return a.kind < b.kind ? -1 : 1;
+  // For bundles, preserve line order within the same file.
+  if (aFile === bFile && aIdx !== undefined && bIdx !== undefined && aIdx !== bIdx) return aIdx - bIdx;
+
   if (aPath === bPath) return 0;
   return aPath < bPath ? -1 : 1;
 }

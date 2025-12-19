@@ -10,6 +10,7 @@ export type RenderedPR = {
   kind: "proposal" | "request";
   createdAt: string;
   createdBy: string;
+  inboxProposals?: { actor: string; time: string; headRef: string; title: string }[];
   events: { time: string; actor: string; action: string; message?: string; headRef?: string }[];
 };
 
@@ -34,6 +35,7 @@ export function listPRs(snapshot: Snapshot): string[] {
 export function renderPR(snapshot: Snapshot, prKey: string): RenderedPR | undefined {
   const all = [...snapshot.collabEvents, ...(snapshot.inbox?.events ?? [])];
   let root: A5cEventBase | undefined;
+  const inboxProposals: RenderedPR["inboxProposals"] = [];
 
   // Choose deterministic root among proposal/request events:
   // prefer request in main snapshot; otherwise lowest (time, actor, id) across all.
@@ -41,6 +43,14 @@ export function renderPR(snapshot: Snapshot, prKey: string): RenderedPR | undefi
     const e = ef.event;
     if (!isPRRootEvent(e)) continue;
     if ((e as any).payload.prKey !== prKey) continue;
+    if ((snapshot.inbox?.events ?? []).some((x) => x.path === ef.path) && e.kind === "pr.proposal.created") {
+      inboxProposals.push({
+        actor: e.actor,
+        time: e.time,
+        headRef: (e as any).payload.headRef,
+        title: (e as any).payload.title
+      });
+    }
     if (!root) root = e;
     else {
       const a = `${e.time}\0${e.actor}\0${e.id}`;
@@ -73,6 +83,7 @@ export function renderPR(snapshot: Snapshot, prKey: string): RenderedPR | undefi
     kind: root.kind === "pr.proposal.created" ? "proposal" : "request",
     createdAt: root.time,
     createdBy: root.actor,
+    inboxProposals: inboxProposals.length > 0 ? inboxProposals.sort((a, b) => (a.time < b.time ? -1 : a.time > b.time ? 1 : a.actor < b.actor ? -1 : 1)) : undefined,
     events
   };
 }

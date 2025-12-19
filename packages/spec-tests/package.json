@@ -10,6 +10,7 @@
     "ajv-formats": "^3.0.1",
     "fast-glob": "^3.3.2",
     "js-yaml": "^4.1.0",
+    "@a5cforge/sdk": "workspace:*",
     "vitest": "^2.1.8"
   }
 }
