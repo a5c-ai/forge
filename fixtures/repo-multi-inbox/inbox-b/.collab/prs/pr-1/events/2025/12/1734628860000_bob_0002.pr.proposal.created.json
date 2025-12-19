@@ -1,0 +1,16 @@
+{
+  "schema": "a5cforge/v1",
+  "kind": "pr.proposal.created",
+  "id": "evt_pr1_proposal_inbox_b_0002",
+  "time": "2025-12-19T14:41:00Z",
+  "actor": "bob",
+  "payload": {
+    "prKey": "pr-1",
+    "baseRef": "refs/heads/main",
+    "headRef": "refs/heads/feature-b",
+    "title": "Proposal B for pr-1",
+    "body": "Inbox B proposal."
+  }
+}
+
+

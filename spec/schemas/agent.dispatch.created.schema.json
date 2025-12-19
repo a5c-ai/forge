@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a5cforge.dev/schemas/a5cforge-v1/agent.dispatch.created.schema.json",
+  "title": "a5cforge/v1 - agent.dispatch.created",
+  "allOf": [
+    { "$ref": "./event.base.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "agent.dispatch.created" },
+        "payload": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["dispatchId", "agentId", "entity"],
+          "properties": {
+            "dispatchId": { "type": "string", "minLength": 1 },
+            "agentId": { "type": "string", "minLength": 1 },
+            "entity": { "$ref": "./entity.ref.schema.json" },
+            "task": { "type": "string" },
+            "params": { "type": "object", "additionalProperties": true }
+          }
+        }
+      }
+    }
+  ]
+}
+
+

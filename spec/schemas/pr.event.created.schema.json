@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a5cforge.dev/schemas/a5cforge-v1/pr.event.created.schema.json",
+  "title": "a5cforge/v1 - pr.event.created",
+  "allOf": [
+    { "$ref": "./event.base.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "pr.event.created" },
+        "payload": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["prKey", "action"],
+          "properties": {
+            "prKey": { "type": "string", "minLength": 1 },
+            "action": {
+              "type": "string",
+              "enum": ["claim", "bindHead", "mergeRecord", "close", "reopen", "progress", "other"]
+            },
+            "headRef": { "type": "string" },
+            "commitOid": { "type": "string" },
+            "method": { "type": "string" },
+            "message": { "type": "string" }
+          }
+        }
+      }
+    }
+  ]
+}
+
+

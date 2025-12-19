@@ -1,0 +1,15 @@
+{
+  "schema": "a5cforge/v1",
+  "kind": "pr.event.created",
+  "id": "evt_pr2_bindHead_0003",
+  "time": "2025-12-19T14:43:40Z",
+  "actor": "bob",
+  "payload": {
+    "prKey": "pr-2",
+    "action": "bindHead",
+    "headRef": "refs/heads/work-bob",
+    "message": "Bind head ref after claim."
+  }
+}
+
+

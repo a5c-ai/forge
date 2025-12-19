@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a5cforge.dev/schemas/a5cforge-v1/pr.proposal.created.schema.json",
+  "title": "a5cforge/v1 - pr.proposal.created",
+  "allOf": [
+    { "$ref": "./event.base.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "pr.proposal.created" },
+        "payload": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["prKey", "baseRef", "headRef", "title"],
+          "properties": {
+            "prKey": { "type": "string", "minLength": 1 },
+            "baseRef": { "type": "string", "minLength": 1 },
+            "headRef": { "type": "string", "minLength": 1 },
+            "title": { "type": "string", "minLength": 1 },
+            "body": { "type": "string" }
+          }
+        }
+      }
+    }
+  ]
+}
+
+

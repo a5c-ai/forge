@@ -1,0 +1,15 @@
+{
+  "schema": "a5cforge/v1",
+  "kind": "issue.event.created",
+  "id": "evt_issue2_created_0001",
+  "time": "2025-12-19T14:46:40Z",
+  "actor": "alice",
+  "payload": {
+    "issueId": "issue-2",
+    "title": "Second issue",
+    "body": "This is the second issue in the repo-basic fixture.",
+    "state": "open"
+  }
+}
+
+

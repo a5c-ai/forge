@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a5cforge.dev/schemas/a5cforge-v1/agent.claim.changed.schema.json",
+  "title": "a5cforge/v1 - agent.claim.changed",
+  "allOf": [
+    { "$ref": "./event.base.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "agent.claim.changed" },
+        "payload": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["agentId", "entity", "op"],
+          "properties": {
+            "agentId": { "type": "string", "minLength": 1 },
+            "entity": { "$ref": "./entity.ref.schema.json" },
+            "op": { "type": "string", "enum": ["claim", "release"] },
+            "note": { "type": "string" }
+          }
+        }
+      }
+    }
+  ]
+}
+
+

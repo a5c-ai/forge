@@ -1,0 +1,14 @@
+{
+  "schema": "a5cforge/v1",
+  "kind": "agent.heartbeat.created",
+  "id": "evt_agent1_hb_0001",
+  "time": "2025-12-19T14:10:00Z",
+  "actor": "agent1",
+  "payload": {
+    "agentId": "agent1",
+    "ttlSeconds": 300,
+    "status": "idle"
+  }
+}
+
+

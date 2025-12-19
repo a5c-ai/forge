@@ -1,0 +1,14 @@
+{
+  "schema": "a5cforge/v1",
+  "kind": "comment.edited",
+  "id": "evt_issue1_comment1_edited_0002",
+  "time": "2025-12-19T14:32:00Z",
+  "actor": "bob",
+  "payload": {
+    "entity": { "type": "issue", "id": "issue-1" },
+    "commentId": "c-issue1-1",
+    "body": "Edited comment body (JSON event)."
+  }
+}
+
+

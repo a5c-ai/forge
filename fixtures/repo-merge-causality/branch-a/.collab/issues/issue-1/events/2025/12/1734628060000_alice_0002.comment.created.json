@@ -1,0 +1,14 @@
+{
+  "schema": "a5cforge/v1",
+  "kind": "comment.created",
+  "id": "evt_issue1_comment_a_0002",
+  "time": "2025-12-19T14:27:40Z",
+  "actor": "alice",
+  "payload": {
+    "entity": { "type": "issue", "id": "issue-1" },
+    "commentId": "c-a",
+    "body": "Concurrent comment from branch A."
+  }
+}
+
+

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a5cforge.dev/schemas/a5cforge-v1/gate.changed.schema.json",
+  "title": "a5cforge/v1 - gate.changed",
+  "allOf": [
+    { "$ref": "./event.base.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "gate.changed" },
+        "payload": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["entity", "needsHuman"],
+          "properties": {
+            "entity": { "$ref": "./entity.ref.schema.json" },
+            "needsHuman": { "type": "boolean" },
+            "topic": { "type": "string" },
+            "message": { "type": "string" }
+          }
+        }
+      }
+    }
+  ]
+}
+
+

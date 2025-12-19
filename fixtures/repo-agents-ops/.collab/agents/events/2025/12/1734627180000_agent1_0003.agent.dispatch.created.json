@@ -1,0 +1,16 @@
+{
+  "schema": "a5cforge/v1",
+  "kind": "agent.dispatch.created",
+  "id": "evt_agent1_dispatch_0003",
+  "time": "2025-12-19T14:13:00Z",
+  "actor": "agent1",
+  "payload": {
+    "dispatchId": "d-1",
+    "agentId": "agent1",
+    "entity": { "type": "issue", "id": "issue-1" },
+    "task": "run-tests",
+    "params": { "suite": "unit" }
+  }
+}
+
+

@@ -1,0 +1,15 @@
+{
+  "schema": "a5cforge/v1",
+  "kind": "agent.claim.changed",
+  "id": "evt_agent1_claim_issue1_0002",
+  "time": "2025-12-19T14:12:00Z",
+  "actor": "agent1",
+  "payload": {
+    "agentId": "agent1",
+    "entity": { "type": "issue", "id": "issue-1" },
+    "op": "claim",
+    "note": "Agent claims issue-1."
+  }
+}
+
+

@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a5cforge.dev/schemas/a5cforge-v1/ops.event.created.schema.json",
+  "title": "a5cforge/v1 - ops.event.created",
+  "allOf": [
+    { "$ref": "./event.base.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "ops.event.created" },
+        "payload": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["op", "entity"],
+          "properties": {
+            "op": { "type": "string", "minLength": 1 },
+            "entity": { "$ref": "./entity.ref.schema.json" },
+            "status": { "type": "string" },
+            "artifact": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "name": { "type": "string" },
+                "uri": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
+
+

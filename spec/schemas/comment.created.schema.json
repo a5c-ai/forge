@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a5cforge.dev/schemas/a5cforge-v1/comment.created.schema.json",
+  "title": "a5cforge/v1 - comment.created",
+  "allOf": [
+    { "$ref": "./event.base.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "comment.created" },
+        "payload": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["entity", "commentId"],
+          "properties": {
+            "entity": { "$ref": "./entity.ref.schema.json" },
+            "commentId": { "type": "string", "minLength": 1 },
+            "inReplyTo": { "type": "string" },
+            "body": { "type": "string" }
+          }
+        }
+      }
+    }
+  ]
+}
+
+

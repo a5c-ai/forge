@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a5cforge.dev/schemas/a5cforge-v1/entity.ref.schema.json",
+  "title": "a5cforge/v1 - Entity reference",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["type", "id"],
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": ["issue", "pr"]
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
+
+

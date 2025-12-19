@@ -1,0 +1,15 @@
+{
+  "schema": "a5cforge/v1",
+  "kind": "ops.event.created",
+  "id": "evt_ops_build_0001",
+  "time": "2025-12-19T14:20:00Z",
+  "actor": "ci",
+  "payload": {
+    "op": "build",
+    "entity": { "type": "pr", "id": "pr-1" },
+    "status": "success",
+    "artifact": { "name": "build.zip", "uri": "https://example.invalid/artifacts/build.zip" }
+  }
+}
+
+

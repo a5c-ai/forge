@@ -1,0 +1,15 @@
+{
+  "schema": "a5cforge/v1",
+  "kind": "pr.request.created",
+  "id": "evt_pr2_request_0001",
+  "time": "2025-12-19T14:41:40Z",
+  "actor": "alice",
+  "payload": {
+    "prKey": "pr-2",
+    "baseRef": "refs/heads/main",
+    "title": "Request for work: implement Y",
+    "body": "Request-for-work PR in repo-basic."
+  }
+}
+
+

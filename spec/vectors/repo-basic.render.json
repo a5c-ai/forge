@@ -1,0 +1,79 @@
+{
+  "schema": "a5cforge/v1",
+  "fixture": "repo-basic",
+  "issues": [
+    {
+      "issueId": "issue-1",
+      "title": "First issue",
+      "body": "This is the first issue in the repo-basic fixture.",
+      "state": "open",
+      "createdAt": "2025-12-19T14:30:00Z",
+      "createdBy": "alice",
+      "comments": [
+        {
+          "commentId": "c-issue1-1",
+          "author": "bob",
+          "createdAt": "2025-12-19T14:31:00Z",
+          "redacted": true,
+          "redactedReason": "Demonstrate redaction lifecycle in fixtures.",
+          "edits": [
+            {
+              "time": "2025-12-19T14:32:00Z",
+              "actor": "bob",
+              "body": "Edited comment body (JSON event)."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "issueId": "issue-2",
+      "title": "Second issue",
+      "body": "This is the second issue in the repo-basic fixture.",
+      "state": "open",
+      "createdAt": "2025-12-19T14:46:40Z",
+      "createdBy": "alice",
+      "comments": []
+    }
+  ],
+  "prs": [
+    {
+      "prKey": "pr-1",
+      "title": "Add feature-x",
+      "body": "PR proposal in repo-basic.",
+      "baseRef": "refs/heads/main",
+      "headRef": "refs/heads/feature-x",
+      "kind": "proposal",
+      "createdAt": "2025-12-19T14:40:00Z",
+      "createdBy": "alice",
+      "events": []
+    },
+    {
+      "prKey": "pr-2",
+      "title": "Request for work: implement Y",
+      "body": "Request-for-work PR in repo-basic.",
+      "baseRef": "refs/heads/main",
+      "kind": "request",
+      "createdAt": "2025-12-19T14:41:40Z",
+      "createdBy": "alice",
+      "events": [
+        {
+          "time": "2025-12-19T14:42:40Z",
+          "actor": "bob",
+          "action": "claim",
+          "message": "Bob claims the request-for-work PR.",
+          "headRef": "refs/heads/work-bob"
+        },
+        {
+          "time": "2025-12-19T14:43:40Z",
+          "actor": "bob",
+          "action": "bindHead",
+          "message": "Bind head ref after claim.",
+          "headRef": "refs/heads/work-bob"
+        }
+      ]
+    }
+  ]
+}
+
+

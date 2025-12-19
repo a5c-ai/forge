@@ -1,0 +1,23 @@
+{
+  "schema": "a5cforge/v1",
+  "map": {
+    "issue.event.created": "issue.event.created.schema.json",
+    "pr.proposal.created": "pr.proposal.created.schema.json",
+    "pr.request.created": "pr.request.created.schema.json",
+    "pr.event.created": "pr.event.created.schema.json",
+    "comment.created": "comment.created.schema.json",
+    "comment.edited": "comment.edited.schema.json",
+    "comment.redacted": "comment.redacted.schema.json",
+    "dep.changed": "dep.changed.schema.json",
+    "gate.changed": "gate.changed.schema.json",
+    "agent.heartbeat.created": "agent.heartbeat.created.schema.json",
+    "agent.claim.changed": "agent.claim.changed.schema.json",
+    "agent.dispatch.created": "agent.dispatch.created.schema.json",
+    "agent.ack.created": "agent.ack.created.schema.json",
+    "agent.nack.created": "agent.nack.created.schema.json",
+    "agent.progress.created": "agent.progress.created.schema.json",
+    "ops.event.created": "ops.event.created.schema.json"
+  }
+}
+
+

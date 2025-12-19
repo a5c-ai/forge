@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a5cforge.dev/schemas/a5cforge-v1/dep.changed.schema.json",
+  "title": "a5cforge/v1 - dep.changed",
+  "allOf": [
+    { "$ref": "./event.base.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "dep.changed" },
+        "payload": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["entity", "op", "by"],
+          "properties": {
+            "entity": { "$ref": "./entity.ref.schema.json" },
+            "op": { "type": "string", "enum": ["add", "remove"] },
+            "by": { "$ref": "./entity.ref.schema.json" },
+            "note": { "type": "string" }
+          }
+        }
+      }
+    }
+  ]
+}
+
+
