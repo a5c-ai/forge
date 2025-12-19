@@ -1,0 +1,92 @@
+import Link from "next/link";
+import { RepoBanner } from "../../../components/RepoBanner";
+import { Selectors } from "../../../components/Selectors";
+import { getRenderedIssue } from "../../../lib/serverRepo";
+
+export default async function IssuePage(props: {
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const { id } = await props.params;
+  const sp = (await props.searchParams) ?? {};
+  const treeish = typeof sp.treeish === "string" ? sp.treeish : undefined;
+  const inbox = typeof sp.inbox === "string" ? sp.inbox : undefined;
+  const inboxRefs = inbox ? inbox.split(",").map((s) => s.trim()).filter(Boolean) : undefined;
+  const issue: any = await getRenderedIssue(id, { treeish, inboxRefs });
+
+  if (!issue) {
+    return (
+      <main className="space-y-4">
+        <div className="flex items-baseline justify-between">
+          <h1 className="text-2xl font-semibold">Issue not found</h1>
+          <Link className="text-sm text-zinc-300 hover:text-white" href="/issues">
+            Back
+          </Link>
+        </div>
+        <RepoBanner />
+        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 text-sm text-zinc-300">{id}</div>
+      </main>
+    );
+  }
+
+  return (
+    <main className="space-y-4">
+      <div className="flex items-baseline justify-between">
+        <h1 className="text-2xl font-semibold">{issue.title}</h1>
+        <Link className="text-sm text-zinc-300 hover:text-white" href="/issues">
+          Back
+        </Link>
+      </div>
+      <RepoBanner />
+      <Selectors defaultTreeish={treeish} defaultInboxRefs={inbox} />
+      <Selectors defaultTreeish={treeish} defaultInboxRefs={inbox} />
+
+      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+        <div className="text-xs text-zinc-400">
+          {issue.issueId} • {issue.state} • {issue.createdBy} @ {issue.createdAt}
+        </div>
+        {issue.body ? <div className="mt-3 whitespace-pre-wrap text-sm text-zinc-200">{issue.body}</div> : null}
+        {issue.needsHuman ? (
+          <div className="mt-4 rounded border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200">
+            needsHuman{issue.needsHuman.topic ? ` (${issue.needsHuman.topic})` : ""}: {issue.needsHuman.message ?? ""}
+          </div>
+        ) : null}
+        {Array.isArray(issue.blockers) && issue.blockers.length ? (
+          <div className="mt-4 text-sm text-zinc-300">
+            <div className="font-medium text-zinc-200">Blockers</div>
+            <ul className="mt-2 list-disc pl-5">
+              {issue.blockers.map((b: any, idx: number) => (
+                <li key={idx}>
+                  {b.by?.type}:{b.by?.id} {b.note ? `— ${b.note}` : ""}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </div>
+
+      <div className="rounded-lg border border-zinc-800 bg-zinc-900">
+        <div className="border-b border-zinc-800 p-4 text-sm font-medium text-zinc-200">Comments</div>
+        {issue.comments.length === 0 ? (
+          <div className="p-4 text-sm text-zinc-300">No comments.</div>
+        ) : (
+          issue.comments.map((c: any) => (
+            <div key={c.commentId} className="border-b border-zinc-800 p-4 last:border-b-0">
+              <div className="text-xs text-zinc-400">
+                {c.commentId} • {c.author} @ {c.createdAt}
+              </div>
+              {c.redacted ? (
+                <div className="mt-2 text-sm text-zinc-500">[redacted]{c.redactedReason ? ` — ${c.redactedReason}` : ""}</div>
+              ) : (
+                <div className="mt-2 whitespace-pre-wrap text-sm text-zinc-200">{c.body ?? ""}</div>
+              )}
+              {c.edits?.length ? <div className="mt-2 text-xs text-zinc-500">edits: {c.edits.length}</div> : null}
+            </div>
+          ))
+        )}
+      </div>
+    </main>
+  );
+}
+
+

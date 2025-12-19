@@ -1,0 +1,22 @@
+{
+  "name": "@a5cforge/cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "git-a5c": "./dist/bin/git-a5c.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@a5cforge/sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.8"
+  }
+}
+
+

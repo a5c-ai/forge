@@ -1,2 +1,6 @@
 **/node_modules/**
 node_modules/**
+**/dist/**
+packages/cli/test/__snapshots__/cli.snapshots.test.ts.snap
+apps/ui/.next/**
+
