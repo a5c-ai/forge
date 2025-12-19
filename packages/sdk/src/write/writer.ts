@@ -180,6 +180,163 @@ export async function writeAgentHeartbeat(ctx: WriterContext, input: { agentId: 
   return { path: rel, event: ev };
 }
 
+export async function writeAgentClaimChanged(
+  ctx: WriterContext,
+  input: { agentId: string; entity: { type: "issue" | "pr"; id: string }; op: "claim" | "release"; note?: string; time: string }
+) {
+  const nonce = (ctx.nextNonce ?? defaultNonceGen())();
+  const tsMs = tsMsFromIso(input.time);
+  ctx.clock.tick(tsMs);
+  const ev: A5cEventBase = {
+    schema: "a5cforge/v1",
+    kind: "agent.claim.changed",
+    id: `evt_${input.agentId}_claim_${nonce}`,
+    time: input.time,
+    actor: ctx.actor,
+    payload: { agentId: input.agentId, entity: input.entity, op: input.op, note: input.note }
+  };
+  const dir = agentsEventDir(input.time);
+  const filename = eventFilename({ tsMs, actor: ctx.actor, nonce4: nonce, kind: ev.kind, ext: "json" });
+  const rel = path.posix.join(dir, filename);
+  await writeJsonFile(path.join(ctx.repoRoot, rel), ev);
+  return { path: rel, event: ev };
+}
+
+export async function writeAgentDispatchCreated(
+  ctx: WriterContext,
+  input: { dispatchId: string; agentId: string; entity: { type: "issue" | "pr"; id: string }; task?: string; params?: any; time: string }
+) {
+  const nonce = (ctx.nextNonce ?? defaultNonceGen())();
+  const tsMs = tsMsFromIso(input.time);
+  ctx.clock.tick(tsMs);
+  const ev: A5cEventBase = {
+    schema: "a5cforge/v1",
+    kind: "agent.dispatch.created",
+    id: `evt_${input.agentId}_dispatch_${nonce}`,
+    time: input.time,
+    actor: ctx.actor,
+    payload: { dispatchId: input.dispatchId, agentId: input.agentId, entity: input.entity, task: input.task, params: input.params }
+  };
+  const dir = agentsEventDir(input.time);
+  const filename = eventFilename({ tsMs, actor: ctx.actor, nonce4: nonce, kind: ev.kind, ext: "json" });
+  const rel = path.posix.join(dir, filename);
+  await writeJsonFile(path.join(ctx.repoRoot, rel), ev);
+  return { path: rel, event: ev };
+}
+
+export async function writeAgentAckCreated(ctx: WriterContext, input: { dispatchId: string; agentId: string; message?: string; time: string }) {
+  const nonce = (ctx.nextNonce ?? defaultNonceGen())();
+  const tsMs = tsMsFromIso(input.time);
+  ctx.clock.tick(tsMs);
+  const ev: A5cEventBase = {
+    schema: "a5cforge/v1",
+    kind: "agent.ack.created",
+    id: `evt_${input.agentId}_ack_${nonce}`,
+    time: input.time,
+    actor: ctx.actor,
+    payload: { dispatchId: input.dispatchId, agentId: input.agentId, message: input.message }
+  };
+  const dir = agentsEventDir(input.time);
+  const filename = eventFilename({ tsMs, actor: ctx.actor, nonce4: nonce, kind: ev.kind, ext: "json" });
+  const rel = path.posix.join(dir, filename);
+  await writeJsonFile(path.join(ctx.repoRoot, rel), ev);
+  return { path: rel, event: ev };
+}
+
+export async function writeAgentNackCreated(ctx: WriterContext, input: { dispatchId: string; agentId: string; error: string; time: string }) {
+  const nonce = (ctx.nextNonce ?? defaultNonceGen())();
+  const tsMs = tsMsFromIso(input.time);
+  ctx.clock.tick(tsMs);
+  const ev: A5cEventBase = {
+    schema: "a5cforge/v1",
+    kind: "agent.nack.created",
+    id: `evt_${input.agentId}_nack_${nonce}`,
+    time: input.time,
+    actor: ctx.actor,
+    payload: { dispatchId: input.dispatchId, agentId: input.agentId, error: input.error }
+  };
+  const dir = agentsEventDir(input.time);
+  const filename = eventFilename({ tsMs, actor: ctx.actor, nonce4: nonce, kind: ev.kind, ext: "json" });
+  const rel = path.posix.join(dir, filename);
+  await writeJsonFile(path.join(ctx.repoRoot, rel), ev);
+  return { path: rel, event: ev };
+}
+
+export async function writeAgentProgressCreated(ctx: WriterContext, input: { dispatchId: string; agentId: string; percent?: number; message?: string; time: string }) {
+  const nonce = (ctx.nextNonce ?? defaultNonceGen())();
+  const tsMs = tsMsFromIso(input.time);
+  ctx.clock.tick(tsMs);
+  const ev: A5cEventBase = {
+    schema: "a5cforge/v1",
+    kind: "agent.progress.created",
+    id: `evt_${input.agentId}_progress_${nonce}`,
+    time: input.time,
+    actor: ctx.actor,
+    payload: { dispatchId: input.dispatchId, agentId: input.agentId, percent: input.percent, message: input.message }
+  };
+  const dir = agentsEventDir(input.time);
+  const filename = eventFilename({ tsMs, actor: ctx.actor, nonce4: nonce, kind: ev.kind, ext: "json" });
+  const rel = path.posix.join(dir, filename);
+  await writeJsonFile(path.join(ctx.repoRoot, rel), ev);
+  return { path: rel, event: ev };
+}
+
+export async function writeDepChanged(
+  ctx: WriterContext,
+  input: { entity: { type: "issue" | "pr"; id: string }; op: "add" | "remove"; by: { type: "issue" | "pr"; id: string }; note?: string; time: string }
+) {
+  const nonce = (ctx.nextNonce ?? defaultNonceGen())();
+  const tsMs = tsMsFromIso(input.time);
+  ctx.clock.tick(tsMs);
+  const ev: A5cEventBase = {
+    schema: "a5cforge/v1",
+    kind: "dep.changed",
+    id: `evt_dep_${input.entity.type}_${input.entity.id}_${nonce}`,
+    time: input.time,
+    actor: ctx.actor,
+    payload: { entity: input.entity, op: input.op, by: input.by, note: input.note }
+  };
+  const dir = input.entity.type === "issue" ? issueEventDir(input.entity.id, input.time) : prEventDir(input.entity.id, input.time);
+  const filename = eventFilename({ tsMs, actor: ctx.actor, nonce4: nonce, kind: ev.kind, ext: "json" });
+  const rel = path.posix.join(dir, filename);
+  await writeJsonFile(path.join(ctx.repoRoot, rel), ev);
+  return { path: rel, event: ev };
+}
+
+export async function writeGateChanged(
+  ctx: WriterContext,
+  input: { entity: { type: "issue" | "pr"; id: string }; needsHuman: boolean; topic?: string; message?: string; time: string }
+) {
+  const nonce = (ctx.nextNonce ?? defaultNonceGen())();
+  const tsMs = tsMsFromIso(input.time);
+  ctx.clock.tick(tsMs);
+  const ev: A5cEventBase = {
+    schema: "a5cforge/v1",
+    kind: "gate.changed",
+    id: `evt_gate_${input.entity.type}_${input.entity.id}_${nonce}`,
+    time: input.time,
+    actor: ctx.actor,
+    payload: { entity: input.entity, needsHuman: input.needsHuman, topic: input.topic, message: input.message }
+  };
+  const dir = input.entity.type === "issue" ? issueEventDir(input.entity.id, input.time) : prEventDir(input.entity.id, input.time);
+  const filename = eventFilename({ tsMs, actor: ctx.actor, nonce4: nonce, kind: ev.kind, ext: "json" });
+  const rel = path.posix.join(dir, filename);
+  await writeJsonFile(path.join(ctx.repoRoot, rel), ev);
+  return { path: rel, event: ev };
+}
+
+export async function writeOpsBuild(ctx: WriterContext, input: { entity: { type: "issue" | "pr"; id: string }; status?: string; artifact?: any; time: string }) {
+  return writeOpsEvent(ctx, { op: "build", entity: input.entity, status: input.status, artifact: input.artifact, time: input.time });
+}
+
+export async function writeOpsTest(ctx: WriterContext, input: { entity: { type: "issue" | "pr"; id: string }; status?: string; artifact?: any; time: string }) {
+  return writeOpsEvent(ctx, { op: "test", entity: input.entity, status: input.status, artifact: input.artifact, time: input.time });
+}
+
+export async function writeOpsDeploy(ctx: WriterContext, input: { entity: { type: "issue" | "pr"; id: string }; status?: string; artifact?: any; time: string }) {
+  return writeOpsEvent(ctx, { op: "deploy", entity: input.entity, status: input.status, artifact: input.artifact, time: input.time });
+}
+
 export async function writeOpsEvent(ctx: WriterContext, input: { op: string; entity: { type: "issue" | "pr"; id: string }; status?: string; artifact?: any; time: string }) {
   const nonce = (ctx.nextNonce ?? defaultNonceGen())();
   const tsMs = tsMsFromIso(input.time);

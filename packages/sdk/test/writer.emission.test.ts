@@ -5,6 +5,8 @@ import fs from "node:fs/promises";
 import { HlcClock } from "../src/write/hlc.js";
 import {
   writeAgentHeartbeat,
+  writeDepChanged,
+  writeGateChanged,
   writeCommentCreated,
   writeIssueCreated,
   writeOpsEvent,
@@ -62,6 +64,20 @@ describe("writers (emission)", () => {
       status: "success",
       artifact: { name: "x", uri: "https://example.invalid/x" },
       time: "2025-12-19T10:05:00Z"
+    });
+    await writeDepChanged(ctx, {
+      entity: { type: "issue", id: "issue-1" },
+      op: "add",
+      by: { type: "pr", id: "pr-1" },
+      note: "blocked",
+      time: "2025-12-19T10:06:00Z"
+    });
+    await writeGateChanged(ctx, {
+      entity: { type: "pr", id: "pr-1" },
+      needsHuman: true,
+      topic: "review",
+      message: "please",
+      time: "2025-12-19T10:07:00Z"
     });
 
     const files = (await listFiles(dir)).filter((p) => p.includes(`${path.sep}.collab${path.sep}`));

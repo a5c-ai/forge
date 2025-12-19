@@ -56,7 +56,7 @@ function assertEventFilenameGrammar(filePath: string) {
   // Minimal Phase-1 grammar: filename begins with a numeric ms timestamp and contains kind suffix.
   // Example: `1734628200000_alice_0001.issue.event.created.json`
   const base = path.basename(filePath);
-  const ok = /^\d{13}_[A-Za-z0-9._-]+_\d{4}\.[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)*\.(json|md)$/.test(base);
+  const ok = /^\d{13}_[A-Za-z0-9._-]+_\d{4}\.[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)*\.(json|md|ndjson)$/.test(base);
   expect(ok, `Bad event filename grammar: ${base}`).toBe(true);
 }
 
@@ -69,10 +69,10 @@ function assertEventPathGrammar(filePath: string) {
   // - agent global events live under `.collab/agents/events/YYYY/MM/<filename>`
   // - ops global events live under `.collab/ops/events/YYYY/MM/<filename>`
   const patterns = [
-    /\/\.collab\/issues\/[^/]+\/events\/\d{4}\/\d{2}\/[^/]+\.(json|md)$/,
-    /\/\.collab\/prs\/[^/]+\/events\/\d{4}\/\d{2}\/[^/]+\.(json|md)$/,
-    /\/\.collab\/agents\/events\/\d{4}\/\d{2}\/[^/]+\.(json|md)$/,
-    /\/\.collab\/ops\/events\/\d{4}\/\d{2}\/[^/]+\.(json|md)$/
+    /\/\.collab\/issues\/[^/]+\/events\/\d{4}\/\d{2}\/[^/]+\.(json|md|ndjson)$/,
+    /\/\.collab\/prs\/[^/]+\/events\/\d{4}\/\d{2}\/[^/]+\.(json|md|ndjson)$/,
+    /\/\.collab\/agents\/events\/\d{4}\/\d{2}\/[^/]+\.(json|md|ndjson)$/,
+    /\/\.collab\/ops\/events\/\d{4}\/\d{2}\/[^/]+\.(json|md|ndjson)$/
   ];
   const ok = patterns.some((re) => re.test(normalized));
   expect(ok, `Bad event path grammar: ${normalized}`).toBe(true);
@@ -110,7 +110,7 @@ describe("Phase 1 - fixture schema validation", () => {
       ajv.addSchema(await readJson(s));
     }
 
-    const collabFiles = await fg(["fixtures/**/.collab/**/*.{json,md}"], {
+    const collabFiles = await fg(["fixtures/**/.collab/**/*.{json,md,ndjson}"], {
       cwd: root,
       absolute: true,
       onlyFiles: true
@@ -130,10 +130,38 @@ describe("Phase 1 - fixture schema validation", () => {
 
       if (ext === ".json") {
         event = await readJson(filePath);
+        // fallthrough to validate
       } else if (ext === ".md") {
         const md = await fs.readFile(filePath, "utf8");
         const { frontMatter } = parseFrontMatterMarkdown(md);
         event = frontMatter;
+      } else if (ext === ".ndjson") {
+        const raw = await fs.readFile(filePath, "utf8");
+        const lines = raw.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+        for (const line of lines) {
+          const ev = JSON.parse(line);
+          const kind: string | undefined = ev?.kind;
+          expect(kind, `missing kind in ${filePath}`).toBeTypeOf("string");
+          const schemaFile = kindMap.map[kind!];
+          expect(schemaFile, `No schema mapping for kind='${kind}' (${filePath})`).toBeTypeOf("string");
+          const schemaId = `https://a5cforge.dev/schemas/a5cforge-v1/${schemaFile}`;
+          const validate = await ajv.getSchema(schemaId);
+          expect(validate, `missing schema in AJV: ${schemaId}`).toBeTypeOf("function");
+          const ok = validate!(ev);
+          if (!ok) {
+            const errs = (validate!.errors ?? []).slice(0, 5);
+            throw new Error(
+              [
+                `Schema validation failed (ndjson line):`,
+                `- file: ${path.relative(root, filePath)}`,
+                `- kind: ${kind}`,
+                `- schema: ${schemaFile}`,
+                `- errors: ${JSON.stringify(errs, null, 2)}`
+              ].join("\n")
+            );
+          }
+        }
+        continue;
       } else {
         throw new Error(`unexpected extension: ${ext}`);
       }

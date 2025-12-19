@@ -8,7 +8,7 @@ export type EventKeyParts = {
 // Filename example:
 //   1734628200000_alice_0001.issue.event.created.json
 export function parseEventKeyFromFilename(filename: string): EventKeyParts {
-  const m = /^(\d{13})_([A-Za-z0-9._-]+)_(\d{4})\.([a-z][a-z0-9]*(?:\.[a-z][a-z0-9]*)*)\.(json|md)$/.exec(
+  const m = /^(\d{13})_([A-Za-z0-9._-]+)_(\d{4})\.([a-z][a-z0-9]*(?:\.[a-z][a-z0-9]*)*)\.(json|md|ndjson)$/.exec(
     filename
   );
   if (!m) {

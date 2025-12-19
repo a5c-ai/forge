@@ -10,6 +10,10 @@ export type RenderedPR = {
   kind: "proposal" | "request";
   createdAt: string;
   createdBy: string;
+  needsHuman?: { topic?: string; message?: string };
+  blockers?: { by: { type: "issue" | "pr"; id: string }; note?: string }[];
+  agentHeartbeats?: { time: string; actor: string; agentId: string; ttlSeconds?: number; status?: string }[];
+  opsEvents?: { time: string; actor: string; op: string; status?: string; artifact?: any }[];
   inboxProposals?: { actor: string; time: string; headRef: string; title: string }[];
   events: { time: string; actor: string; action: string; message?: string; headRef?: string }[];
 };
@@ -36,6 +40,10 @@ export function renderPR(snapshot: Snapshot, prKey: string): RenderedPR | undefi
   const all = [...snapshot.collabEvents, ...(snapshot.inbox?.events ?? [])];
   let root: A5cEventBase | undefined;
   const inboxProposals: RenderedPR["inboxProposals"] = [];
+  const blockers = new Map<string, { by: { type: "issue" | "pr"; id: string }; note?: string }>();
+  let needsHuman: RenderedPR["needsHuman"];
+  const agentHeartbeats: RenderedPR["agentHeartbeats"] = [];
+  const opsEvents: RenderedPR["opsEvents"] = [];
 
   // Choose deterministic root among proposal/request events:
   // prefer request in main snapshot; otherwise lowest (time, actor, id) across all.
@@ -63,6 +71,48 @@ export function renderPR(snapshot: Snapshot, prKey: string): RenderedPR | undefi
   const events: RenderedPR["events"] = [];
   for (const ef of snapshot.collabEvents) {
     const e = ef.event;
+    if (e.kind === "dep.changed") {
+      const ent = (e as any).payload?.entity;
+      if (ent?.type === "pr" && ent?.id === prKey) {
+        const by = (e as any).payload.by;
+        const op = (e as any).payload.op;
+        const key = `${by?.type}:${by?.id}`;
+        if (op === "add") blockers.set(key, { by, note: (e as any).payload.note });
+        if (op === "remove") blockers.delete(key);
+      }
+    }
+    if (e.kind === "gate.changed") {
+      const ent = (e as any).payload?.entity;
+      if (ent?.type === "pr" && ent?.id === prKey) {
+        const nh = Boolean((e as any).payload.needsHuman);
+        if (nh) needsHuman = { topic: (e as any).payload.topic, message: (e as any).payload.message };
+        else needsHuman = undefined;
+      }
+    }
+    if (e.kind === "agent.heartbeat.created") {
+      const ent = (e as any).payload?.entity;
+      if (ent?.type === "pr" && ent?.id === prKey) {
+        agentHeartbeats.push({
+          time: e.time,
+          actor: e.actor,
+          agentId: (e as any).payload.agentId,
+          ttlSeconds: (e as any).payload.ttlSeconds,
+          status: (e as any).payload.status
+        });
+      }
+    }
+    if (e.kind === "ops.event.created") {
+      const ent = (e as any).payload?.entity;
+      if (ent?.type === "pr" && ent?.id === prKey) {
+        opsEvents.push({
+          time: e.time,
+          actor: e.actor,
+          op: (e as any).payload.op,
+          status: (e as any).payload.status,
+          artifact: (e as any).payload.artifact
+        });
+      }
+    }
     if (!isPREvent(e)) continue;
     if ((e as any).payload.prKey !== prKey) continue;
     events.push({
@@ -83,6 +133,10 @@ export function renderPR(snapshot: Snapshot, prKey: string): RenderedPR | undefi
     kind: root.kind === "pr.proposal.created" ? "proposal" : "request",
     createdAt: root.time,
     createdBy: root.actor,
+    needsHuman,
+    blockers: blockers.size > 0 ? [...blockers.values()] : undefined,
+    agentHeartbeats: agentHeartbeats.length > 0 ? agentHeartbeats : undefined,
+    opsEvents: opsEvents.length > 0 ? opsEvents : undefined,
     inboxProposals: inboxProposals.length > 0 ? inboxProposals.sort((a, b) => (a.time < b.time ? -1 : a.time > b.time ? 1 : a.actor < b.actor ? -1 : 1)) : undefined,
     events
   };

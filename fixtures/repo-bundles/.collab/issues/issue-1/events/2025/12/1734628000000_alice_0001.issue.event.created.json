@@ -1,0 +1,15 @@
+{
+  "schema": "a5cforge/v1",
+  "kind": "issue.event.created",
+  "id": "evt_issue1_created_0001",
+  "time": "2025-12-19T14:26:40Z",
+  "actor": "alice",
+  "payload": {
+    "issueId": "issue-1",
+    "title": "Bundle fixture issue",
+    "body": "Issue used to validate NDJSON bundle parsing.",
+    "state": "open"
+  }
+}
+
+

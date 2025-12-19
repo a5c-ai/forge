@@ -10,5 +10,8 @@ export * from "./write/ulid.js";
 export * from "./write/hlc.js";
 export * from "./write/paths.js";
 export * from "./write/writer.js";
+export * from "./write/hlcStore.js";
+export * from "./write/stage.js";
+export * from "./verify/verify.js";
 
 

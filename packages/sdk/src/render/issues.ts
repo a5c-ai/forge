@@ -18,6 +18,8 @@ export type RenderedIssue = {
   state: "open" | "closed";
   createdAt: string;
   createdBy: string;
+  needsHuman?: { topic?: string; message?: string };
+  blockers?: { by: { type: "issue" | "pr"; id: string }; note?: string }[];
   comments: RenderedComment[];
 };
 
@@ -48,6 +50,8 @@ export function listIssues(snapshot: Snapshot): string[] {
 export function renderIssue(snapshot: Snapshot, issueId: string): RenderedIssue | undefined {
   let created: A5cEventBase | undefined;
   const comments = new Map<string, RenderedComment>();
+  const blockers = new Map<string, { by: { type: "issue" | "pr"; id: string }; note?: string }>();
+  let needsHuman: RenderedIssue["needsHuman"];
 
   for (const ef of snapshot.collabEvents) {
     const e = ef.event;
@@ -55,6 +59,25 @@ export function renderIssue(snapshot: Snapshot, issueId: string): RenderedIssue 
       // First create wins in this baseline (should be deterministic given ordering).
       created ??= e;
       continue;
+    }
+
+    if (e.kind === "dep.changed") {
+      const ent = (e as any).payload?.entity;
+      if (ent?.type === "issue" && ent?.id === issueId) {
+        const by = (e as any).payload.by;
+        const op = (e as any).payload.op;
+        const key = `${by?.type}:${by?.id}`;
+        if (op === "add") blockers.set(key, { by, note: (e as any).payload.note });
+        if (op === "remove") blockers.delete(key);
+      }
+    }
+    if (e.kind === "gate.changed") {
+      const ent = (e as any).payload?.entity;
+      if (ent?.type === "issue" && ent?.id === issueId) {
+        const nh = Boolean((e as any).payload.needsHuman);
+        if (nh) needsHuman = { topic: (e as any).payload.topic, message: (e as any).payload.message };
+        else needsHuman = undefined;
+      }
     }
 
     if (!isCommentEvent(e)) continue;
@@ -111,6 +134,8 @@ export function renderIssue(snapshot: Snapshot, issueId: string): RenderedIssue 
     state: ((created as any).payload.state ?? "open") as any,
     createdAt: created.time,
     createdBy: created.actor,
+    needsHuman,
+    blockers: blockers.size > 0 ? [...blockers.values()] : undefined,
     comments: [...comments.values()].sort((a, b) => (a.createdAt < b.createdAt ? -1 : a.createdAt > b.createdAt ? 1 : 0))
   };
   return rendered;

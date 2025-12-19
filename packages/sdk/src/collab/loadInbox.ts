@@ -1,6 +1,6 @@
 import type { IGit } from "../git/IGit.js";
 import type { ParsedEventFile } from "./eventTypes.js";
-import { parseEventFileBytes } from "./parseEventFile.js";
+import { parseEventFileBytes, parseEventFileBytesMany } from "./parseEventFile.js";
 import { compareEventFilesByPath } from "./eventKey.js";
 
 async function walkTree(
@@ -32,10 +32,14 @@ export async function loadInboxSnapshot(opts: { git: IGit; inboxRef: string }): 
   await walkTree(opts.git, commitOid, ".collab", async (p) => {
     // Exclude non-event config files.
     if (p === ".collab/discovery.json" || p.endsWith("/discovery.json")) return;
-    if (!(p.endsWith(".json") || p.endsWith(".md"))) return;
+    if (!(p.endsWith(".json") || p.endsWith(".md") || p.endsWith(".ndjson"))) return;
     const bytes = await opts.git.readBlob(commitOid, p);
-    const event = parseEventFileBytes(p, bytes);
-    events.push({ path: p, kind: event.kind, event });
+    const evs = p.endsWith(".ndjson") ? parseEventFileBytesMany(p, bytes) : [parseEventFileBytes(p, bytes)];
+    for (let i = 0; i < evs.length; i++) {
+      const event = evs[i]!;
+      const ep = p.endsWith(".ndjson") ? `${p}::${i}` : p;
+      events.push({ path: ep, kind: event.kind, event });
+    }
   });
   events.sort((a, b) => compareEventFilesByPath(a.path, b.path));
   return { ref: opts.inboxRef, commitOid, collabEvents: events };

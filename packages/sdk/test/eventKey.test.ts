@@ -10,6 +10,11 @@ describe("eventKey", () => {
     expect(p.kind).toBe("issue.event.created");
   });
 
+  it("accepts ndjson extension for bundles", () => {
+    const p = parseEventKeyFromFilename("1734628200000_alice_0002.bundle.ndjson");
+    expect(p.kind).toBe("bundle");
+  });
+
   it("sorts deterministically by (tsMs, actor, nonce, kind, path)", () => {
     const a = ".collab/x/2025/12/1734628200000_alice_0002.comment.created.json";
     const b = ".collab/x/2025/12/1734628200000_alice_0001.comment.created.json";

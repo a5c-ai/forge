@@ -1,0 +1,4 @@
+{"schema":"a5cforge/v1","kind":"comment.created","id":"evt_c1","time":"2025-12-19T14:27:40Z","actor":"alice","payload":{"entity":{"type":"issue","id":"issue-1"},"commentId":"c1","body":"First comment in bundle."}}
+{"schema":"a5cforge/v1","kind":"comment.created","id":"evt_c2","time":"2025-12-19T14:27:41Z","actor":"bob","payload":{"entity":{"type":"issue","id":"issue-1"},"commentId":"c2","body":"Second comment in bundle."}}
+
+
