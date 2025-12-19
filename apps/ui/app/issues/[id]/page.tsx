@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { RepoBanner } from "../../../components/RepoBanner";
 import { Selectors } from "../../../components/Selectors";
+import { CommentForm } from "../../../components/CommentForm";
 import { getRenderedIssue } from "../../../lib/serverRepo";
 
 export default async function IssuePage(props: {
@@ -38,7 +39,6 @@ export default async function IssuePage(props: {
         </Link>
       </div>
       <RepoBanner />
-      <Selectors defaultTreeish={treeish} defaultInboxRefs={inbox} />
       <Selectors defaultTreeish={treeish} defaultInboxRefs={inbox} />
 
       <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
@@ -85,6 +85,8 @@ export default async function IssuePage(props: {
           ))
         )}
       </div>
+
+      <CommentForm issueId={id} />
     </main>
   );
 }

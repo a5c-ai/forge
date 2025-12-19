@@ -39,7 +39,6 @@ export default async function PRPage(props: {
       </div>
       <RepoBanner />
       <Selectors defaultTreeish={treeish} defaultInboxRefs={inbox} />
-      <Selectors defaultTreeish={treeish} defaultInboxRefs={inbox} />
 
       <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
         <div className="text-xs text-zinc-400">

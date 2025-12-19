@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { RepoBanner } from "../../components/RepoBanner";
 import { Selectors } from "../../components/Selectors";
+import { PrRequestForm } from "../../components/PrRequestForm";
 import { getRenderedPRs } from "../../lib/serverRepo";
 
 export default async function PRsPage(props: { searchParams?: Promise<Record<string, string | string[] | undefined>> }) {
@@ -19,6 +20,7 @@ export default async function PRsPage(props: { searchParams?: Promise<Record<str
       </div>
       <RepoBanner />
       <Selectors defaultTreeish={treeish} defaultInboxRefs={inbox} />
+      <PrRequestForm />
 
       <div className="divide-y divide-zinc-800 rounded-lg border border-zinc-800 bg-zinc-900">
         {prs.length === 0 ? (
