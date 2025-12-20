@@ -14,5 +14,6 @@ export * from "./write/hlcStore.js";
 export * from "./write/stage.js";
 export * from "./verify/verify.js";
 export * from "./crypto/jcs.js";
+export * from "./logging/logger.js";
 
 

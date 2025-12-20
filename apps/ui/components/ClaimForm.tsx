@@ -49,8 +49,8 @@ export function ClaimForm(props: {
                     try {
                       await post("release", { agentId: c.agentId });
                       router.refresh();
-                    } catch (e: any) {
-                      setErr(String(e?.message ?? e));
+                    } catch (err2: any) {
+                      setErr(String(err2?.message ?? err2));
                     } finally {
                       setBusy(false);
                     }
@@ -77,8 +77,8 @@ export function ClaimForm(props: {
               setAgentId("");
               setNote("");
               router.refresh();
-            } catch (e: any) {
-              setErr(String(e?.message ?? e));
+            } catch (err2: any) {
+              setErr(String(err2?.message ?? err2));
             } finally {
               setBusy(false);
             }

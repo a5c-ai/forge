@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { IGit, GitTreeEntry } from "./IGit.js";
+import type { IGit, GitTreeEntry } from "./IGit.js";
 
 export class ShellGit implements IGit {
   constructor(private readonly repoRoot: string) {}

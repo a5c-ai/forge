@@ -12,7 +12,6 @@ describe("Phase 1 - fixture schema validation", () => {
     const root = repoRootFromHere(import.meta.dirname);
 
     const schemaDir = path.join(root, "spec", "schemas");
-    const kindMapPath = path.join(schemaDir, "kind-map.v1.json");
     const kindMap = await loadKindMap(schemaDir);
     expect(kindMap.schema).toBe("a5cforge/v1");
 

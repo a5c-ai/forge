@@ -29,8 +29,8 @@ export function CommentForm(props: { issueId: string }) {
           }
           setBody("");
           router.refresh();
-        } catch (e: any) {
-          setErr(String(e?.message ?? e));
+        } catch (err2: any) {
+          setErr(String(err2?.message ?? err2));
         } finally {
           setBusy(false);
         }

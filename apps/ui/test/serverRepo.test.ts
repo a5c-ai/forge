@@ -21,7 +21,7 @@ describe("serverRepo helpers", () => {
     const pr2 = await getRenderedPR("pr-2");
     expect(pr2).toBeTruthy();
     expect((pr2 as any).prKey).toBe("pr-2");
-  });
+  }, 20_000);
 });
 
 

@@ -24,6 +24,10 @@ jobs:
           cache: "pnpm"
       - name: Install
         run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm lint
+      - name: Duplication check
+        run: pnpm dupcheck
       - name: Test
         run: pnpm test
 

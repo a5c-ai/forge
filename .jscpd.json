@@ -1,0 +1,23 @@
+{
+  "gitignore": true,
+  "reporters": ["console"],
+  "threshold": 12,
+  "minLines": 15,
+  "minTokens": 80,
+  "formatsExts": {
+    "typescript": [".ts", ".tsx"],
+    "javascript": [".js", ".mjs", ".cjs"]
+  },
+  "ignore": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/.next/**",
+    "**/coverage/**",
+    "**/playwright-report/**",
+    "**/test-results/**",
+    "**/fixtures/**",
+    "**/spec/vectors/**"
+  ]
+}
+
+

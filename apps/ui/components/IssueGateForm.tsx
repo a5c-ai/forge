@@ -31,8 +31,8 @@ export function IssueGateForm(props: { issueId: string; current?: { topic?: stri
           const j = await res.json().catch(() => ({}));
           if (!res.ok) throw new Error(j?.error ?? `HTTP ${res.status}`);
           router.refresh();
-        } catch (e: any) {
-          setErr(String(e?.message ?? e));
+        } catch (err2: any) {
+          setErr(String(err2?.message ?? err2));
         } finally {
           setBusy(false);
         }
