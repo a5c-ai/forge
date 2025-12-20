@@ -2,6 +2,9 @@ import Link from "next/link";
 import { RepoBanner } from "../../../components/RepoBanner";
 import { Selectors } from "../../../components/Selectors";
 import { CommentForm } from "../../../components/CommentForm";
+import { IssueGateForm } from "../../../components/IssueGateForm";
+import { IssueBlockersForm } from "../../../components/IssueBlockersForm";
+import { ClaimForm } from "../../../components/ClaimForm";
 import { getRenderedIssue } from "../../../lib/serverRepo";
 
 export default async function IssuePage(props: {
@@ -51,19 +54,11 @@ export default async function IssuePage(props: {
             needsHuman{issue.needsHuman.topic ? ` (${issue.needsHuman.topic})` : ""}: {issue.needsHuman.message ?? ""}
           </div>
         ) : null}
-        {Array.isArray(issue.blockers) && issue.blockers.length ? (
-          <div className="mt-4 text-sm text-zinc-300">
-            <div className="font-medium text-zinc-200">Blockers</div>
-            <ul className="mt-2 list-disc pl-5">
-              {issue.blockers.map((b: any, idx: number) => (
-                <li key={idx}>
-                  {b.by?.type}:{b.by?.id} {b.note ? `— ${b.note}` : ""}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
       </div>
+
+      <IssueGateForm issueId={id} current={issue.needsHuman} />
+      <IssueBlockersForm issueId={id} blockers={issue.blockers} />
+      <ClaimForm kind="issue" id={id} claims={issue.agentClaims} />
 
       <div className="rounded-lg border border-zinc-800 bg-zinc-900">
         <div className="border-b border-zinc-800 p-4 text-sm font-medium text-zinc-200">Comments</div>

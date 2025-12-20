@@ -15,5 +15,6 @@ This folder is a navigable split of `docs/workplan.md` into ordered phases and s
 - [09-phase-7-ui-v0.2-write-remote](09-phase-7-ui-v0.2-write-remote/00-goal.md)
 - [10-phase-8-server-webhooks-orchestration](10-phase-8-server-webhooks-orchestration/00-goal.md)
 - [11-phase-9-hardening-v1.0](11-phase-9-hardening-v1.0/00-goal.md)
+- [12-phase-10-documentation-v1.0](12-phase-10-documentation-v1.0/00-goal.md)
 
 

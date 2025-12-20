@@ -1,48 +1,13 @@
 import { describe, expect, it } from "vitest";
-import path from "node:path";
-import os from "node:os";
-import fs from "node:fs/promises";
-import { spawn } from "node:child_process";
 import { GET as statusGET } from "../app/api/status/route";
 import { GET as issuesGET } from "../app/api/issues/route";
 import { POST as commentPOST } from "../app/api/issues/[id]/comments/route";
 import { POST as prRequestPOST } from "../app/api/prs/[key]/request/route";
-
-function run(cmd: string, args: string[], cwd: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const child = spawn(cmd, args, { cwd, stdio: ["ignore", "pipe", "pipe"], windowsHide: true });
-    const err: Buffer[] = [];
-    child.stderr.on("data", (d) => err.push(Buffer.from(d)));
-    child.on("error", reject);
-    child.on("close", (code) => {
-      if (code === 0) return resolve();
-      reject(new Error(`${cmd} ${args.join(" ")} failed (code=${code}): ${Buffer.concat(err).toString("utf8")}`));
-    });
-  });
-}
-
-async function copyDir(src: string, dst: string) {
-  await fs.mkdir(dst, { recursive: true });
-  const entries = await fs.readdir(src, { withFileTypes: true });
-  for (const e of entries) {
-    const s = path.join(src, e.name);
-    const d = path.join(dst, e.name);
-    if (e.isDirectory()) await copyDir(s, d);
-    else if (e.isFile()) await fs.copyFile(s, d);
-  }
-}
-
-async function makeRepoFromFixture(fixtureName: string): Promise<string> {
-  const root = path.resolve(import.meta.dirname, "../../..");
-  const fixture = path.join(root, "fixtures", fixtureName);
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), `a5cforge-ui-${fixtureName}-`));
-  await copyDir(fixture, dir);
-  await run("git", ["init", "-q", "-b", "main"], dir);
-  await run("git", ["add", "-A"], dir);
-  await run("git", ["add", "-f", ".collab"], dir);
-  await run("git", ["-c", "user.name=test", "-c", "user.email=test@example.com", "commit", "-q", "-m", "fixture"], dir);
-  return dir;
-}
+import { POST as issueGatePOST } from "../app/api/issues/[id]/gate/route";
+import { POST as issueBlockersPOST } from "../app/api/issues/[id]/blockers/route";
+import { POST as issueClaimPOST } from "../app/api/issues/[id]/claim/route";
+import { POST as prClaimPOST } from "../app/api/prs/[key]/claim/route";
+import { makeRepoFromFixture } from "./_util.js";
 
 describe("UI API routes (Phase 6)", () => {
   it("GET /api/status returns counts", async () => {
@@ -118,6 +83,104 @@ describe("UI API routes (Phase 6)", () => {
     );
     const pr = await prRes.json();
     expect(pr).toMatchObject({ prKey: "pr-req-1", kind: "request", baseRef: "main", title: "Request: UI test" });
+  });
+
+  it("POST /api/issues/[id]/gate and /blockers update rendered issue", async () => {
+    const repo = await makeRepoFromFixture("repo-basic");
+    process.env.A5C_REPO = repo;
+    process.env.A5C_TREEISH = "HEAD";
+    process.env.A5C_ACTOR = "alice";
+    delete process.env.A5C_REMOTE_URL;
+    delete process.env.A5C_REMOTE_TOKEN;
+
+    const gateReq = new Request("http://local/api/issues/issue-1/gate", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ needsHuman: true, topic: "review", message: "pls" })
+    });
+    const gateRes = await issueGatePOST(gateReq, { params: Promise.resolve({ id: "issue-1" }) } as any);
+    expect(gateRes.status).toBe(200);
+
+    const addReq = new Request("http://local/api/issues/issue-1/blockers", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ op: "add", by: { type: "issue", id: "issue-2" }, note: "depends" })
+    });
+    const addRes = await issueBlockersPOST(addReq, { params: Promise.resolve({ id: "issue-1" }) } as any);
+    expect(addRes.status).toBe(200);
+
+    const issueRes = await (await import("../app/api/issues/[id]/route")).GET(
+      new Request("http://local/api/issues/issue-1"),
+      { params: Promise.resolve({ id: "issue-1" }) } as any
+    );
+    const issue = await issueRes.json();
+    expect(issue.needsHuman).toMatchObject({ topic: "review", message: "pls" });
+    expect(issue.blockers?.map((b: any) => `${b.by.type}:${b.by.id}`)).toContain("issue:issue-2");
+
+    const rmReq = new Request("http://local/api/issues/issue-1/blockers", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ op: "remove", by: { type: "issue", id: "issue-2" } })
+    });
+    const rmRes = await issueBlockersPOST(rmReq, { params: Promise.resolve({ id: "issue-1" }) } as any);
+    expect(rmRes.status).toBe(200);
+
+    const issueRes2 = await (await import("../app/api/issues/[id]/route")).GET(
+      new Request("http://local/api/issues/issue-1"),
+      { params: Promise.resolve({ id: "issue-1" }) } as any
+    );
+    const issue2 = await issueRes2.json();
+    expect(issue2.blockers ?? []).toHaveLength(0);
+  });
+
+  it("POST /api/issues/[id]/claim and /api/prs/[key]/claim update rendered entities", async () => {
+    const repo = await makeRepoFromFixture("repo-basic");
+    process.env.A5C_REPO = repo;
+    process.env.A5C_TREEISH = "HEAD";
+    process.env.A5C_ACTOR = "alice";
+    delete process.env.A5C_REMOTE_URL;
+    delete process.env.A5C_REMOTE_TOKEN;
+
+    const claimReq = new Request("http://local/api/issues/issue-1/claim", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ agentId: "agent-1", op: "claim", note: "working" })
+    });
+    const claimRes = await issueClaimPOST(claimReq, { params: Promise.resolve({ id: "issue-1" }) } as any);
+    expect(claimRes.status).toBe(200);
+
+    const issueRes = await (await import("../app/api/issues/[id]/route")).GET(
+      new Request("http://local/api/issues/issue-1"),
+      { params: Promise.resolve({ id: "issue-1" }) } as any
+    );
+    const issue = await issueRes.json();
+    expect(issue.agentClaims?.map((c: any) => c.agentId)).toContain("agent-1");
+
+    // Create a PR request first, then claim it.
+    await prRequestPOST(
+      new Request("http://local/api/prs/pr-claim-1/request", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ baseRef: "main", title: "Request: claim me" })
+      }),
+      { params: Promise.resolve({ key: "pr-claim-1" }) } as any
+    );
+    const prClaimRes = await prClaimPOST(
+      new Request("http://local/api/prs/pr-claim-1/claim", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ agentId: "agent-2", op: "claim" })
+      }),
+      { params: Promise.resolve({ key: "pr-claim-1" }) } as any
+    );
+    expect(prClaimRes.status).toBe(200);
+
+    const prRes = await (await import("../app/api/prs/[key]/route")).GET(
+      new Request("http://local/api/prs/pr-claim-1"),
+      { params: Promise.resolve({ key: "pr-claim-1" }) } as any
+    );
+    const pr = await prRes.json();
+    expect(pr.agentClaims?.map((c: any) => c.agentId)).toContain("agent-2");
   });
 });
 

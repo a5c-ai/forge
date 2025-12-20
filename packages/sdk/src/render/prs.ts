@@ -12,6 +12,7 @@ export type RenderedPR = {
   createdBy: string;
   needsHuman?: { topic?: string; message?: string };
   blockers?: { by: { type: "issue" | "pr"; id: string }; note?: string }[];
+  agentClaims?: { agentId: string; by: string; time: string; note?: string }[];
   agentHeartbeats?: { time: string; actor: string; agentId: string; ttlSeconds?: number; status?: string }[];
   opsEvents?: { time: string; actor: string; op: string; status?: string; artifact?: any }[];
   inboxProposals?: { actor: string; time: string; headRef: string; title: string }[];
@@ -42,6 +43,7 @@ export function renderPR(snapshot: Snapshot, prKey: string): RenderedPR | undefi
   const inboxProposals: RenderedPR["inboxProposals"] = [];
   const blockers = new Map<string, { by: { type: "issue" | "pr"; id: string }; note?: string }>();
   let needsHuman: RenderedPR["needsHuman"];
+  const claims = new Map<string, { agentId: string; by: string; time: string; note?: string }>();
   const agentHeartbeats: RenderedPR["agentHeartbeats"] = [];
   const opsEvents: RenderedPR["opsEvents"] = [];
 
@@ -87,6 +89,17 @@ export function renderPR(snapshot: Snapshot, prKey: string): RenderedPR | undefi
         const nh = Boolean((e as any).payload.needsHuman);
         if (nh) needsHuman = { topic: (e as any).payload.topic, message: (e as any).payload.message };
         else needsHuman = undefined;
+      }
+    }
+    if (e.kind === "agent.claim.changed") {
+      const ent = (e as any).payload?.entity;
+      if (ent?.type === "pr" && ent?.id === prKey) {
+        const op = String((e as any).payload.op ?? "");
+        const agentId = String((e as any).payload.agentId ?? "");
+        if (agentId) {
+          if (op === "claim") claims.set(agentId, { agentId, by: e.actor, time: e.time, note: (e as any).payload.note });
+          if (op === "release") claims.delete(agentId);
+        }
       }
     }
     if (e.kind === "agent.heartbeat.created") {
@@ -135,6 +148,7 @@ export function renderPR(snapshot: Snapshot, prKey: string): RenderedPR | undefi
     createdBy: root.actor,
     needsHuman,
     blockers: blockers.size > 0 ? [...blockers.values()] : undefined,
+    agentClaims: claims.size > 0 ? [...claims.values()] : undefined,
     agentHeartbeats: agentHeartbeats.length > 0 ? agentHeartbeats : undefined,
     opsEvents: opsEvents.length > 0 ? opsEvents : undefined,
     inboxProposals: inboxProposals.length > 0 ? inboxProposals.sort((a, b) => (a.time < b.time ? -1 : a.time > b.time ? 1 : a.actor < b.actor ? -1 : 1)) : undefined,

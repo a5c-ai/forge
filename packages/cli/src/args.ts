@@ -30,6 +30,8 @@ export type ParsedArgs = {
     rev?: string;
     artifact?: string;
     dispatchId?: string;
+    url?: string;
+    type?: string;
   };
   positionals: string[];
 };
@@ -74,6 +76,8 @@ export function parseArgs(argv: string[]): ParsedArgs {
     else if (a === "--rev") flags.rev = args.shift()!;
     else if (a === "--artifact") flags.artifact = args.shift()!;
     else if (a === "--dispatch-id") flags.dispatchId = args.shift()!;
+    else if (a === "--url") flags.url = args.shift()!;
+    else if (a === "--type") flags.type = args.shift()!;
     else positionals.push(a);
   }
 

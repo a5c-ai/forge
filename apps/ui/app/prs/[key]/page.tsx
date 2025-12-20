@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { RepoBanner } from "../../../components/RepoBanner";
 import { Selectors } from "../../../components/Selectors";
+import { ClaimForm } from "../../../components/ClaimForm";
 import { getRenderedPR } from "../../../lib/serverRepo";
 
 export default async function PRPage(props: {
@@ -67,6 +68,8 @@ export default async function PRPage(props: {
           </div>
         ) : null}
       </div>
+
+      <ClaimForm kind="pr" id={key} claims={pr.agentClaims} />
 
       {Array.isArray(pr.inboxProposals) && pr.inboxProposals.length ? (
         <div className="rounded-lg border border-zinc-800 bg-zinc-900">

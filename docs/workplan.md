@@ -487,7 +487,7 @@ Output (recommended):
 
 ---
 
-# 9) Phase 9 — Hardening to v1.0 — Hardening to v1.0 — Hardening to v1.0
+# 9) Phase 9 — Hardening to v1.0
 **Goal:** stability, performance, interop.
 
 ## Dev tasks
@@ -500,11 +500,70 @@ Output (recommended):
 3. Docs:
    - adoption guide
    - repo conventions
+   - (see Phase 10 for comprehensive documentation)
 4. Compatibility:
    - schema tests + forward-compat behavior
+5. CI/CD + quality gates:
+   - GitHub Actions workflows for the monorepo:
+     - `ci`: lint + typecheck + unit/integration tests (workspace-wide)
+     - `e2e`: Playwright smoke + e2e (UI) against local server(s)
+     - `release`: version + changelog + publish packages (SDK/CLI/server) when tagged
+     - `deploy` (optional): deploy UI/server for remote mode (staging/prod)
+   - Matrix testing: Node LTS versions and OSes (Windows/macOS/Linux)
+   - Caching: pnpm store cache + build/test caches where applicable
+   - Artifacts: upload test reports, coverage, Playwright traces/screenshots on failure
+   - PR protections: required checks, branch protection, and status checks on main
+   - Pre-commit hooks: enforce eslint/format/typecheck on changed files; CI remains source of truth
 
 ## Tests (mandatory)
 - Load tests with synthetic event volume
 - Compatibility tests across versions
 - Verify determinism across platforms (Windows/macOS/Linux)
+- Comprehensive test pyramid integrated into CI:
+  - unit + integration tests for `packages/*` and `apps/ui` (Vitest)
+  - API route tests (Next.js) against fixtures
+  - CLI integration tests (spawn `git a5c` in temp repos) + snapshot stdout
+  - E2E tests for UI (Playwright) covering core flows (read + write where supported)
+- Coverage:
+  - collect coverage in CI, publish report artifacts, and enforce a minimum threshold
+- Static checks:
+  - ESLint, formatting, and TypeScript typecheck in CI and locally (pre-commit)
+
+---
+
+# 10) Phase 10 — Documentation v1.0
+
+**Goal:** comprehensive, discoverable docs that cover specs/RFCs, product requirements, and practical operator + user guidance.
+
+## Dev tasks
+
+1. Information architecture (IA) for `docs/`:
+   - create/refresh `docs/README.md` as the entrypoint + map of documents
+   - define a stable doc taxonomy: specs, RFCs, requirements, guides, architecture, operations
+   - add “audience” and “status” labels (draft/stable/deprecated) at top of major docs
+2. Specs + RFCs:
+   - ensure `docs/workplan/02-specs-a5cforge-v1/*` is complete, consistent, and cross-linked to `spec/schemas/**`
+   - add an RFC directory (or conventions) for design changes and decisions
+3. Requirements and product documentation:
+   - capture “what/why”: requirements, non-goals, and roadmap notes (keep implementation details in workplan)
+4. Guides:
+   - user guide: install, local mode usage (CLI + UI), common workflows
+   - administrator guide: remote mode setup, keys/auth, webhooks configuration, backups, upgrades
+   - troubleshooting + FAQ: common failure modes and how to diagnose
+5. Architecture documentation:
+   - high-level architecture diagrams/notes for monorepo components (SDK/CLI/UI/server/spec)
+   - data model: `.collab/**` layout, event kinds, invariants, determinism expectations
+6. “How to contribute”:
+   - local dev setup (pnpm, Node versions), running tests, fixtures, adding schemas, release process
+   - coding standards: formatting/linting, commit conventions (if used), PR checklist
+
+## Tests (mandatory)
+
+- Docs correctness checks integrated into CI:
+  - link checking (internal links + anchors)
+  - markdown linting (style consistency)
+  - spellcheck (optional, but recommended for public docs)
+- “Docs-driven” acceptance checks:
+  - all public commands/APIs referenced in docs exist (or are clearly marked as planned)
+  - docs examples are consistent with current CLI help output (snapshot where feasible)
 

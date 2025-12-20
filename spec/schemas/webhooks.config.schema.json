@@ -1,0 +1,32 @@
+{
+  "$id": "https://a5cforge.dev/schemas/a5cforge-v1/webhooks.config.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "a5cforge webhooks config",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "endpoints"],
+  "properties": {
+    "schema": {
+      "const": "a5cforge/v1"
+    },
+    "endpoints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "url", "events"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "url": { "type": "string", "minLength": 1 },
+          "events": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "enabled": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}
+
+

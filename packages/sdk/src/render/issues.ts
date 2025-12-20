@@ -20,6 +20,7 @@ export type RenderedIssue = {
   createdBy: string;
   needsHuman?: { topic?: string; message?: string };
   blockers?: { by: { type: "issue" | "pr"; id: string }; note?: string }[];
+  agentClaims?: { agentId: string; by: string; time: string; note?: string }[];
   comments: RenderedComment[];
 };
 
@@ -52,6 +53,7 @@ export function renderIssue(snapshot: Snapshot, issueId: string): RenderedIssue 
   const comments = new Map<string, RenderedComment>();
   const blockers = new Map<string, { by: { type: "issue" | "pr"; id: string }; note?: string }>();
   let needsHuman: RenderedIssue["needsHuman"];
+  const claims = new Map<string, { agentId: string; by: string; time: string; note?: string }>();
 
   for (const ef of snapshot.collabEvents) {
     const e = ef.event;
@@ -77,6 +79,17 @@ export function renderIssue(snapshot: Snapshot, issueId: string): RenderedIssue 
         const nh = Boolean((e as any).payload.needsHuman);
         if (nh) needsHuman = { topic: (e as any).payload.topic, message: (e as any).payload.message };
         else needsHuman = undefined;
+      }
+    }
+    if (e.kind === "agent.claim.changed") {
+      const ent = (e as any).payload?.entity;
+      if (ent?.type === "issue" && ent?.id === issueId) {
+        const op = String((e as any).payload.op ?? "");
+        const agentId = String((e as any).payload.agentId ?? "");
+        if (agentId) {
+          if (op === "claim") claims.set(agentId, { agentId, by: e.actor, time: e.time, note: (e as any).payload.note });
+          if (op === "release") claims.delete(agentId);
+        }
       }
     }
 
@@ -136,6 +149,7 @@ export function renderIssue(snapshot: Snapshot, issueId: string): RenderedIssue 
     createdBy: created.actor,
     needsHuman,
     blockers: blockers.size > 0 ? [...blockers.values()] : undefined,
+    agentClaims: claims.size > 0 ? [...claims.values()] : undefined,
     comments: [...comments.values()].sort((a, b) => (a.createdAt < b.createdAt ? -1 : a.createdAt > b.createdAt ? 1 : 0))
   };
   return rendered;

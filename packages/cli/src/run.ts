@@ -1,5 +1,6 @@
 import { detectRepoRoot, git, gitConfigGet, gitPath } from "./git.js";
 import fs from "node:fs/promises";
+import path from "node:path";
 import { parseArgs } from "./args.js";
 import { parseSinceToEpochMs } from "./time.js";
 import {
@@ -113,11 +114,64 @@ export async function runCli(argv: string[], opts: RunOptions = {}): Promise<num
     writeLine(out, "  verify");
     writeLine(out, "  journal [--since <2h|2025-...>] [--limit N] [--types a,b] [--entity <id>] [--active]");
     writeLine(out, "  hooks install|uninstall");
+    writeLine(out, "  webhook status");
+    writeLine(out, "  webhook test --url <url> [--type <type>]");
     return 0;
   }
 
   const repo = await openRepo(repoRoot);
   const snap = await loadSnapshot({ git: repo.git, treeish, inboxRefs: flags.inboxRefs });
+
+  if (cmd === "webhook") {
+    const sub = positionals[1];
+    if (sub === "status") {
+      try {
+        const commitOid = await repo.git.revParse(treeish);
+        const raw = await repo.git.readBlob(commitOid, ".collab/webhooks.json");
+        const cfg = JSON.parse(raw.toString("utf8"));
+        const endpoints = Array.isArray(cfg?.endpoints) ? cfg.endpoints : [];
+        if (flags.json) writeLine(out, JSON.stringify({ schema: cfg?.schema, endpoints }, null, 2));
+        else {
+          writeLine(out, `schema: ${cfg?.schema ?? "?"}`);
+          writeLine(out, `endpoints: ${endpoints.length}`);
+          for (const e of endpoints) {
+            writeLine(out, `- ${e.id}: ${e.url} (${(e.events ?? []).join(",")}) ${e.enabled === false ? "[disabled]" : ""}`);
+          }
+        }
+        return 0;
+      } catch (e: any) {
+        writeLine(err, `no webhooks config at .collab/webhooks.json in ${treeish}`);
+        return 2;
+      }
+    }
+    if (sub === "test") {
+      const url = flags.url;
+      if (!url) {
+        writeLine(err, "usage: git a5c webhook test --url <url> [--type <type>]");
+        return 2;
+      }
+      const type = flags.type ?? "git.ref.updated";
+      const envelope = {
+        schema: "a5cforge/v1",
+        type,
+        id: `cli:${Date.now()}`,
+        time: new Date(nowMs()).toISOString(),
+        repo: { id: path.basename(repoRoot), path: repoRoot },
+        source: { serverId: "cli", keyId: undefined },
+        data: { note: "test" }
+      };
+      const r = await fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(envelope, null, 2) + "\n" });
+      const text = await r.text();
+      if (flags.json) writeLine(out, JSON.stringify({ status: r.status, body: text }, null, 2));
+      else {
+        writeLine(out, `status: ${r.status}`);
+        writeLine(out, text.trim());
+      }
+      return r.ok ? 0 : 1;
+    }
+    writeLine(err, "usage: git a5c webhook status|test ...");
+    return 2;
+  }
 
   if (cmd === "status") {
     const issues = listIssues(snap).length;
