@@ -17,7 +17,13 @@ export default defineConfig({
       // Unit tests focus on API route handlers + server-side repo helpers.
       // We intentionally exclude React components/pages from unit coverage (covered by Playwright e2e).
       include: ["app/api/**/*.ts", "app/api/_lib/**/*.ts", "lib/serverRepo.ts"],
-      exclude: ["e2e/**", "components/**", "app/**/page.tsx", "app/layout.tsx", "**/*.d.ts"]
+      exclude: ["e2e/**", "components/**", "app/**/page.tsx", "app/layout.tsx", "**/*.d.ts"],
+      thresholds: {
+        statements: 70,
+        branches: 25,
+        functions: 90,
+        lines: 70
+      }
     }
   }
 });

@@ -1,5 +1,13 @@
 # A.1 Webhook specification
 
+**Audience:** contributors, operators  
+**Status:** draft
+
+Related:
+- Schemas index: `spec/schemas/README.md`
+- Webhooks config schema: `spec/schemas/webhooks.config.schema.json`
+- JCS implementation: `packages/sdk/src/crypto/jcs.ts`
+
 ## A.1.1 Goals
 - Enable **external orchestration** (agents/CI/CD/workflows) to react to both:
   - a5cforge events (`.collab/**`)

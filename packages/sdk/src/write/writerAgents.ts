@@ -3,7 +3,10 @@ import { eventFilename, agentsEventDir } from "./paths.js";
 import type { A5cEventBase } from "../collab/eventTypes.js";
 import { defaultNonceGen, tsMsFromIso, type WriterContext, writeJsonFile } from "./writerCore.js";
 
-export async function writeAgentHeartbeat(ctx: WriterContext, input: { agentId: string; ttlSeconds: number; status?: string; time: string }) {
+export async function writeAgentHeartbeat(
+  ctx: WriterContext,
+  input: { agentId: string; ttlSeconds: number; status?: string; entity?: { type: "issue" | "pr"; id: string }; time: string }
+) {
   const nonce = (ctx.nextNonce ?? defaultNonceGen())();
   const tsMs = tsMsFromIso(input.time);
   ctx.clock.tick(tsMs);
@@ -13,7 +16,7 @@ export async function writeAgentHeartbeat(ctx: WriterContext, input: { agentId: 
     id: `evt_${input.agentId}_hb_${nonce}`,
     time: input.time,
     actor: ctx.actor,
-    payload: { agentId: input.agentId, ttlSeconds: input.ttlSeconds, status: input.status }
+    payload: { agentId: input.agentId, ttlSeconds: input.ttlSeconds, status: input.status, entity: input.entity }
   };
   const dir = agentsEventDir(input.time);
   const filename = eventFilename({ tsMs, actor: ctx.actor, nonce4: nonce, kind: ev.kind, ext: "json" });

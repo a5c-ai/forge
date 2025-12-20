@@ -25,7 +25,7 @@ export function handleHelp(args: CommandArgs): number | undefined {
   writeLine(out, "  block <entityId> --by <issue|pr> [--op add|remove] [-m <note>] [--stage-only|--commit]");
   writeLine(out, "  gate needs-human <entityId> [--topic <t>] [-m <msg>] [--stage-only|--commit]");
   writeLine(out, "  gate clear <entityId> [-m <msg>] [--stage-only|--commit]");
-  writeLine(out, "  agent heartbeat [--agent-id <id>] [--ttl-seconds N] [-m <status>] [--stage-only|--commit]");
+  writeLine(out, "  agent heartbeat [--agent-id <id>] [--ttl-seconds N] [--entity <id>] [-m <status>] [--stage-only|--commit]");
   writeLine(out, "  ops deploy --entity <id> [--artifact <uri>] [-m <status>] [--stage-only|--commit]");
   writeLine(out, "  verify");
   writeLine(out, "  journal [--since <2h|2025-...>] [--limit N] [--types a,b] [--entity <id>] [--active]");

@@ -5,6 +5,7 @@ import { CommentForm } from "../../../components/CommentForm";
 import { IssueGateForm } from "../../../components/IssueGateForm";
 import { IssueBlockersForm } from "../../../components/IssueBlockersForm";
 import { ClaimForm } from "../../../components/ClaimForm";
+import { UiErrorPanel } from "../../../components/UiErrorPanel";
 import { getRenderedIssue } from "../../../lib/serverRepo";
 
 export default async function IssuePage(props: {
@@ -16,7 +17,29 @@ export default async function IssuePage(props: {
   const treeish = typeof sp.treeish === "string" ? sp.treeish : undefined;
   const inbox = typeof sp.inbox === "string" ? sp.inbox : undefined;
   const inboxRefs = inbox ? inbox.split(",").map((s) => s.trim()).filter(Boolean) : undefined;
-  const issue: any = await getRenderedIssue(id, { treeish, inboxRefs });
+  let issue: any = null;
+  let loadError: string | null = null;
+  try {
+    issue = await getRenderedIssue(id, { treeish, inboxRefs });
+  } catch (e: any) {
+    loadError = String(e?.message ?? e);
+  }
+
+  if (loadError) {
+    return (
+      <main className="space-y-4">
+        <div className="flex items-baseline justify-between">
+          <h1 className="text-2xl font-semibold">Issue</h1>
+          <Link className="text-sm text-zinc-300 hover:text-white" href="/issues">
+            Back
+          </Link>
+        </div>
+        <RepoBanner />
+        <Selectors defaultTreeish={treeish} defaultInboxRefs={inbox} />
+        <UiErrorPanel title="Unable to load issue" message={`The UI could not load issue '${id}'.`} details={loadError} />
+      </main>
+    );
+  }
 
   if (!issue) {
     return (
@@ -51,7 +74,8 @@ export default async function IssuePage(props: {
         {issue.body ? <div className="mt-3 whitespace-pre-wrap text-sm text-zinc-200">{issue.body}</div> : null}
         {issue.needsHuman ? (
           <div className="mt-4 rounded border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200">
-            needsHuman{issue.needsHuman.topic ? ` (${issue.needsHuman.topic})` : ""}: {issue.needsHuman.message ?? ""}
+            Needs human review{issue.needsHuman.topic ? ` (${issue.needsHuman.topic})` : ""}
+            {issue.needsHuman.message ? `: ${issue.needsHuman.message}` : ""}
           </div>
         ) : null}
       </div>

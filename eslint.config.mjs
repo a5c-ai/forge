@@ -34,7 +34,12 @@ export default [
       "no-console": "error",
       // Duplication-ish signals (not perfect, but high-signal).
       "sonarjs/no-identical-functions": "warn",
-      "sonarjs/no-duplicate-string": ["warn", { threshold: 6 }],
+      "sonarjs/no-duplicate-string": ["warn", { threshold: 10 }],
+      "sonarjs/no-all-duplicated-branches": "warn",
+      "sonarjs/no-collapsible-if": "warn",
+      "sonarjs/no-inverted-boolean-check": "warn",
+      "sonarjs/no-identical-expressions": "warn",
+      "sonarjs/prefer-immediate-return": "warn",
       // Next.js uses this in `next-env.d.ts`; we don't lint it as a style problem.
       "@typescript-eslint/triple-slash-reference": "off",
       // TypeScript handles these better.
@@ -57,6 +62,9 @@ export default [
     files: ["**/test/**/*.{ts,tsx}", "**/*.test.{ts,tsx}"],
     rules: {
       "no-console": "off",
+      // Too noisy for tests; we enforce these primarily on source.
+      "sonarjs/no-duplicate-string": "off",
+      "sonarjs/no-identical-functions": "off",
       "max-lines": ["warn", { max: 450, skipBlankLines: true, skipComments: true }],
       "max-lines-per-function": ["warn", { max: 220, skipBlankLines: true, skipComments: true }],
       "complexity": "off"
@@ -71,6 +79,20 @@ export default [
   {
     files: ["packages/*/src/logging/**/*.{ts,tsx}"],
     rules: { "no-console": "off" }
+  },
+  // Node scripts may use process/console.
+  {
+    files: ["scripts/**/*.{js,mjs,cjs}"],
+    languageOptions: {
+      globals: {
+        Buffer: "readonly",
+        console: "readonly",
+        process: "readonly"
+      }
+    },
+    rules: {
+      "no-console": "off"
+    }
   }
 ];
 

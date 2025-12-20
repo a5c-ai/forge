@@ -20,6 +20,12 @@ describe("eventKey", () => {
     const b = ".collab/x/2025/12/1734628200000_alice_0001.comment.created.json";
     expect(compareEventFilesByPath(a, b)).toBeGreaterThan(0);
   });
+
+  it("handles Windows path separators in file paths", () => {
+    const a = ".collab\\x\\2025\\12\\1734628200000_alice_0002.comment.created.json";
+    const b = ".collab\\x\\2025\\12\\1734628200000_alice_0001.comment.created.json";
+    expect(compareEventFilesByPath(a, b)).toBeGreaterThan(0);
+  });
 });
 
 

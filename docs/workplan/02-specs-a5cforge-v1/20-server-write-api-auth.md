@@ -1,6 +1,14 @@
 # A.3 Server write API authentication (asymmetric)
 External orchestrators will write back a5cforge events via the server. Authentication SHOULD be asymmetric.
 
+**Audience:** contributors, operators  
+**Status:** draft
+
+Related:
+- Server implementation: `packages/server/`
+- UI remote mode: `docs/guides/admin-guide.md`
+- Webhook spec: `docs/workplan/02-specs-a5cforge-v1/00-webhook-spec.md`
+
 **Public keys in repo (tracked):**
 - `.collab/keys/clients/<clientId>.pub`
 

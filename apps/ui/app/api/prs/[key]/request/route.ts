@@ -6,7 +6,10 @@ import { runGit } from "../../../_lib/gitRun";
 export async function POST(req: Request, ctx: { params: Promise<{ key: string }> }) {
   try {
     const { key } = await ctx.params;
-    const body = (await req.json().catch(() => null)) ?? {};
+    const bodyRaw = (await req.json().catch(() => null)) ?? {};
+    const body: any = bodyRaw && typeof bodyRaw === "object" ? bodyRaw : {};
+    const actor = String(body.actor ?? process.env.A5C_ACTOR ?? "ui");
+    body.actor = actor;
     const cfg = getRepoConfigFromEnv();
 
     // Remote mode: proxy to a5c-server.
@@ -23,7 +26,6 @@ export async function POST(req: Request, ctx: { params: Promise<{ key: string }>
       return NextResponse.json(j, { status: r.status });
     }
 
-    const actor = String(body.actor ?? process.env.A5C_ACTOR ?? "ui");
     const baseRef = String(body.baseRef ?? "");
     const title = String(body.title ?? "");
     const prBody = body.body == null ? undefined : String(body.body);

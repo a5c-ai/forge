@@ -2,6 +2,7 @@ import Link from "next/link";
 import { RepoBanner } from "../../../components/RepoBanner";
 import { Selectors } from "../../../components/Selectors";
 import { ClaimForm } from "../../../components/ClaimForm";
+import { UiErrorPanel } from "../../../components/UiErrorPanel";
 import { getRenderedPR } from "../../../lib/serverRepo";
 
 export default async function PRPage(props: {
@@ -13,7 +14,29 @@ export default async function PRPage(props: {
   const treeish = typeof sp.treeish === "string" ? sp.treeish : undefined;
   const inbox = typeof sp.inbox === "string" ? sp.inbox : undefined;
   const inboxRefs = inbox ? inbox.split(",").map((s) => s.trim()).filter(Boolean) : undefined;
-  const pr: any = await getRenderedPR(key, { treeish, inboxRefs });
+  let pr: any = null;
+  let loadError: string | null = null;
+  try {
+    pr = await getRenderedPR(key, { treeish, inboxRefs });
+  } catch (e: any) {
+    loadError = String(e?.message ?? e);
+  }
+
+  if (loadError) {
+    return (
+      <main className="space-y-4">
+        <div className="flex items-baseline justify-between">
+          <h1 className="text-2xl font-semibold">PR</h1>
+          <Link className="text-sm text-zinc-300 hover:text-white" href="/prs">
+            Back
+          </Link>
+        </div>
+        <RepoBanner />
+        <Selectors defaultTreeish={treeish} defaultInboxRefs={inbox} />
+        <UiErrorPanel title="Unable to load PR" message={`The UI could not load PR '${key}'.`} details={loadError} />
+      </main>
+    );
+  }
 
   if (!pr) {
     return (
@@ -51,7 +74,8 @@ export default async function PRPage(props: {
 
         {pr.needsHuman ? (
           <div className="mt-4 rounded border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200">
-            needsHuman{pr.needsHuman.topic ? ` (${pr.needsHuman.topic})` : ""}: {pr.needsHuman.message ?? ""}
+            Needs human review{pr.needsHuman.topic ? ` (${pr.needsHuman.topic})` : ""}
+            {pr.needsHuman.message ? `: ${pr.needsHuman.message}` : ""}
           </div>
         ) : null}
 

@@ -39,7 +39,7 @@ export function IssueGateForm(props: { issueId: string; current?: { topic?: stri
       }}
     >
       <div className="flex items-center justify-between gap-3">
-        <div className="text-sm font-medium text-zinc-200">Gate: needsHuman</div>
+        <div className="text-sm font-medium text-zinc-200">Needs human review</div>
         <label className="flex items-center gap-2 text-sm text-zinc-300">
           <input type="checkbox" checked={needsHuman} onChange={(e) => setNeedsHuman(e.target.checked)} />
           enabled

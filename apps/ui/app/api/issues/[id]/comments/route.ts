@@ -6,7 +6,11 @@ import { runGit } from "../../../_lib/gitRun";
 export async function POST(req: Request, ctx: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await ctx.params;
-    const body = (await req.json().catch(() => null)) ?? {};
+    const bodyRaw = (await req.json().catch(() => null)) ?? {};
+    const body: any = bodyRaw && typeof bodyRaw === "object" ? bodyRaw : {};
+    const actor = String(body.actor ?? process.env.A5C_ACTOR ?? "ui");
+    body.actor = actor;
+
     const commentBody = String(body.body ?? "");
     if (!commentBody.trim()) return NextResponse.json({ error: "missing body" }, { status: 400 });
 
@@ -27,7 +31,6 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     }
 
     // Local mode: write into repo and commit so reads at HEAD update.
-    const actor = String(body.actor ?? process.env.A5C_ACTOR ?? "ui");
     const commentId = String(body.commentId ?? `c_${Date.now()}`);
     const repo = await openRepo(cfg.repo);
     const state = await loadHlcState(actor);

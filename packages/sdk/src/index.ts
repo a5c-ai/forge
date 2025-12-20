@@ -4,6 +4,7 @@ export * from "./collab/loadSnapshot.js";
 export * from "./collab/parseEventFile.js";
 export * from "./collab/loadInbox.js";
 export * from "./collab/discovery.js";
+export * from "./collab/snapshotCache.js";
 export * from "./render/issues.js";
 export * from "./render/prs.js";
 export * from "./write/ulid.js";

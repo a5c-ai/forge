@@ -1,0 +1,16 @@
+{
+  "config": {
+    "default": true,
+    "MD013": false,
+    "MD033": false,
+    "MD047": false
+  },
+  "globs": [
+    "docs/**/*.md",
+    "spec/**/*.md",
+    "!docs/workplan/**",
+    "!docs/workplan.md"
+  ]
+}
+
+

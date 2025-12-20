@@ -2,6 +2,7 @@ import Link from "next/link";
 import { RepoBanner } from "../../components/RepoBanner";
 import { Selectors } from "../../components/Selectors";
 import { PrRequestForm } from "../../components/PrRequestForm";
+import { UiErrorPanel } from "../../components/UiErrorPanel";
 import { getRenderedPRs } from "../../lib/serverRepo";
 
 export default async function PRsPage(props: { searchParams?: Promise<Record<string, string | string[] | undefined>> }) {
@@ -9,7 +10,13 @@ export default async function PRsPage(props: { searchParams?: Promise<Record<str
   const treeish = typeof sp.treeish === "string" ? sp.treeish : undefined;
   const inbox = typeof sp.inbox === "string" ? sp.inbox : undefined;
   const inboxRefs = inbox ? inbox.split(",").map((s) => s.trim()).filter(Boolean) : undefined;
-  const prs: any[] = await getRenderedPRs({ treeish, inboxRefs });
+  let prs: any[] = [];
+  let loadError: string | null = null;
+  try {
+    prs = (await getRenderedPRs({ treeish, inboxRefs })) as any[];
+  } catch (e: any) {
+    loadError = String(e?.message ?? e);
+  }
   return (
     <main className="space-y-4">
       <div className="flex items-baseline justify-between">
@@ -21,6 +28,9 @@ export default async function PRsPage(props: { searchParams?: Promise<Record<str
       <RepoBanner />
       <Selectors defaultTreeish={treeish} defaultInboxRefs={inbox} />
       <PrRequestForm />
+      {loadError ? (
+        <UiErrorPanel title="Unable to load PRs" message="The UI could not read `.collab/**` from the configured repo." details={loadError} />
+      ) : null}
 
       <div className="divide-y divide-zinc-800 rounded-lg border border-zinc-800 bg-zinc-900">
         {prs.length === 0 ? (

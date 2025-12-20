@@ -28,6 +28,8 @@ jobs:
         run: pnpm lint
       - name: Duplication check
         run: pnpm dupcheck
+      - name: Docs check
+        run: pnpm docs:check
       - name: Test
         run: pnpm test
 

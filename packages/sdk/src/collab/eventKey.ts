@@ -25,8 +25,9 @@ export function compareEventFilesByPath(aPath: string, bPath: string): number {
   const aIdx = aIdxRaw ? Number(aIdxRaw) : undefined;
   const bIdx = bIdxRaw ? Number(bIdxRaw) : undefined;
 
-  const aBase = (aFile.split("/").pop() ?? aFile) as string;
-  const bBase = (bFile.split("/").pop() ?? bFile) as string;
+  // Be robust to Windows-style separators in case callers pass filesystem paths.
+  const aBase = (aFile.split(/[/\\]/).pop() ?? aFile) as string;
+  const bBase = (bFile.split(/[/\\]/).pop() ?? bFile) as string;
   const a = parseEventKeyFromFilename(aBase);
   const b = parseEventKeyFromFilename(bBase);
 

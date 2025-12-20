@@ -6,3 +6,4 @@ packages/cli/test/__snapshots__/cli.snapshots.test.ts.snap
 apps/ui/.next/**
 packages/server/test/**/*.js
 
+.tmp/

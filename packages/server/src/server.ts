@@ -6,7 +6,7 @@ import { handleV1Read } from "./routes/v1/readRoutes.js";
 import { handleV1Write } from "./routes/v1/writeRoutes.js";
 import { handleV1GithubWebhook } from "./routes/v1/githubWebhookRoute.js";
 import { handleV1GitRefUpdated } from "./routes/v1/gitRoutes.js";
-import { createLogger } from "@a5cforge/sdk";
+import { createLogger, createSnapshotCache } from "@a5cforge/sdk";
 
 export type ServerConfig = {
   repoRoot: string;
@@ -36,6 +36,7 @@ function parseInboxRefs(u: URL): string[] | undefined {
 export function createA5cServer(overrides?: Partial<ServerConfig>) {
   const cfg = { ...readEnvConfig(), ...(overrides ?? {}) };
   const log = createLogger({ base: { component: "server" } });
+  const snapshotCache = createSnapshotCache({ maxEntries: 16 });
 
   const server = http.createServer(async (req, res) => {
     const u = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`);
@@ -50,7 +51,10 @@ export function createA5cServer(overrides?: Partial<ServerConfig>) {
 
       const treeish = u.searchParams.get("treeish") ?? "HEAD";
       const inboxRefs = parseInboxRefs(u);
-      if (await handleV1Read({ req, res, repoRoot: cfg.repoRoot, treeish, inboxRefs, pathname: u.pathname })) return;
+      if (
+        await handleV1Read({ req, res, repoRoot: cfg.repoRoot, treeish, inboxRefs, pathname: u.pathname, snapshotCache })
+      )
+        return;
       if (await handleV1Write({ req, res, repoRoot: cfg.repoRoot, pathname: u.pathname, searchParams: u.searchParams })) return;
       if (await handleV1GithubWebhook({ req, res, repoRoot: cfg.repoRoot, pathname: u.pathname })) return;
       if (await handleV1GitRefUpdated({ req, res, repoRoot: cfg.repoRoot, pathname: u.pathname })) return;

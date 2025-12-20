@@ -24,7 +24,9 @@ export async function handleAgent(args: CommandArgs): Promise<number | undefined
     const ttlSeconds = args.flags.ttlSeconds ?? 120;
     const time = new Date(args.nowMs()).toISOString();
     const status = args.flags.message ?? undefined;
-    const res = await writeAgentHeartbeat(ctx, { agentId, ttlSeconds, status, time });
+    const entityId = args.flags.entity;
+    const entity = entityId ? ({ type: entityId.startsWith("pr-") ? "pr" : "issue", id: entityId } as const) : undefined;
+    const res = await writeAgentHeartbeat(ctx, { agentId, ttlSeconds, status, entity, time });
     await saveHlcState(actor, clock.now());
     if (args.flags.stageOnly || args.flags.commit) await stageFiles(args.repoRoot, [res.path]);
     if (args.flags.commit) {

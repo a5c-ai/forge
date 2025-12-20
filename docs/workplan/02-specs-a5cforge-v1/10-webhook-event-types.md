@@ -1,6 +1,13 @@
 # A.2 Webhook event types
 Event types are namespaced. Endpoints subscribe by prefix (e.g., `git.*`).
 
+**Audience:** contributors, operators  
+**Status:** draft
+
+Related:
+- Schemas index: `spec/schemas/README.md`
+- Event schemas live under: `spec/schemas/*.schema.json`
+
 ## A.2.1 Standard Git events (required)
 - `git.ref.updated`
   - emitted on any ref movement (push/fast-forward/force)

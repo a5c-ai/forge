@@ -32,7 +32,10 @@ export function listPRs(snapshot: Snapshot): string[] {
   const all = [...snapshot.collabEvents, ...(snapshot.inbox?.events ?? [])];
   for (const ef of all) {
     const e = ef.event;
-    if (isPRRootEvent(e)) ids.add((e as any).payload.prKey);
+    if (isPRRootEvent(e)) {
+      const prKey = (e as any)?.payload?.prKey;
+      if (typeof prKey === "string" && prKey.length > 0) ids.add(prKey);
+    }
   }
   return [...ids].sort();
 }

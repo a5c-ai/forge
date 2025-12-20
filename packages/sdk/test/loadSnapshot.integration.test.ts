@@ -3,7 +3,7 @@ import path from "node:path";
 import os from "node:os";
 import fs from "node:fs/promises";
 import { spawn } from "node:child_process";
-import { openRepo, loadSnapshot } from "../src/index.js";
+import { createSnapshotCache, openRepo, loadSnapshot, type IGit } from "../src/index.js";
 
 function run(cmd: string, args: string[], cwd: string): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -62,6 +62,50 @@ describe("loadSnapshot (integration)", () => {
     // This assertion intentionally weak: we don't require sorted to equal lexicographic,
     // but we keep it around to ensure paths are at least deterministic and comparable.
     expect(paths.length).toBe(sorted.length);
+  });
+
+  it("supports an opt-in cache and tolerates malformed event files (forward-compat)", async () => {
+    const root = path.resolve(import.meta.dirname, "../../..");
+    const fixture = path.join(root, "fixtures", "repo-basic");
+
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "a5cforge-fixture-"));
+    await copyDir(fixture, dir);
+    await run("git", ["init", "-q"], dir);
+    await run("git", ["add", "-A"], dir);
+    await run("git", ["add", "-f", ".collab"], dir);
+
+    // Add a malformed JSON event file. We should NOT crash; it should show up as a parse error.
+    const badPath = path.join(dir, ".collab", "issues", "issue-1", "events", "2025", "12", "9999999999999_bob_0001.comment.created.json");
+    await fs.mkdir(path.dirname(badPath), { recursive: true });
+    await fs.writeFile(badPath, "{ this is not json", "utf8");
+
+    await run("git", ["add", "-A"], dir);
+    await run("git", ["add", "-f", ".collab"], dir);
+    await run("git", ["-c", "user.name=test", "-c", "user.email=test@example.com", "commit", "-q", "-m", "fixture+bad"], dir);
+
+    const repo = await openRepo(dir);
+    const cache = createSnapshotCache({ maxEntries: 4 });
+
+    // Count underlying blob reads to prove caching is used.
+    const innerGit = repo.git;
+    let readBlobCalls = 0;
+    const countingGit: IGit = {
+      revParse: (treeish: string) => innerGit.revParse(treeish),
+      lsTree: (commitOid: string, treePath: string) => innerGit.lsTree(commitOid, treePath),
+      readBlob: async (commitOid: string, blobPath: string) => {
+        readBlobCalls++;
+        return innerGit.readBlob(commitOid, blobPath);
+      }
+    };
+
+    const snap1 = await loadSnapshot({ git: countingGit, treeish: "HEAD", cache });
+    expect(snap1.parseErrors?.length ?? 0).toBeGreaterThan(0);
+    const firstCalls = readBlobCalls;
+
+    const snap2 = await loadSnapshot({ git: countingGit, treeish: "HEAD", cache });
+    expect(snap2.collabEvents.map((e) => e.path)).toEqual(snap1.collabEvents.map((e) => e.path));
+    // Second load should use cached parsed snapshot and avoid re-reading blobs.
+    expect(readBlobCalls).toBe(firstCalls);
   });
 });
 

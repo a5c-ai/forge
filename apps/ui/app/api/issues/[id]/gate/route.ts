@@ -6,7 +6,10 @@ import { runGit } from "../../../_lib/gitRun";
 export async function POST(req: Request, ctx: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await ctx.params;
-    const body = (await req.json().catch(() => null)) ?? {};
+    const bodyRaw = (await req.json().catch(() => null)) ?? {};
+    const body: any = bodyRaw && typeof bodyRaw === "object" ? bodyRaw : {};
+    const actor = String(body.actor ?? process.env.A5C_ACTOR ?? "ui");
+    body.actor = actor;
     const cfg = getRepoConfigFromEnv();
 
     if (cfg.remoteUrl) {
@@ -22,7 +25,6 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
       return NextResponse.json(j, { status: r.status });
     }
 
-    const actor = String(body.actor ?? process.env.A5C_ACTOR ?? "ui");
     const needsHuman = Boolean(body.needsHuman);
     const topic = body.topic == null ? undefined : String(body.topic);
     const message = body.message == null ? undefined : String(body.message);

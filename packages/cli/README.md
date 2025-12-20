@@ -1,6 +1,6 @@
 # @a5cforge/cli
 
-Read-only CLI (Phase 4).
+CLI for reading and writing a5cforge events.
 
 ## Usage
 Installed as a `git` subcommand binary (`git-a5c`), so you can run:
@@ -18,5 +18,15 @@ Common flags:
 - `--treeish <ref>`: load snapshot from a commit/ref (default: `HEAD`)
 - `--inbox-ref <ref>`: include events from an inbox ref (repeatable)
 - `--json`: JSON output
+
+## Local install from this monorepo
+
+From the repo root:
+
+```bash
+pnpm -C packages/cli build
+pnpm -C packages/cli link --global
+git a5c help
+```
 
 

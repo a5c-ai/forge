@@ -43,7 +43,10 @@ export function listIssues(snapshot: Snapshot): string[] {
   const ids = new Set<string>();
   for (const ef of snapshot.collabEvents) {
     const e = ef.event;
-    if (isIssueEvent(e)) ids.add((e as any).payload.issueId);
+    if (isIssueEvent(e)) {
+      const issueId = (e as any)?.payload?.issueId;
+      if (typeof issueId === "string" && issueId.length > 0) ids.add(issueId);
+    }
   }
   return [...ids].sort();
 }

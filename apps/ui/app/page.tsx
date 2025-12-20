@@ -5,7 +5,7 @@ export default function HomePage() {
     <main className="space-y-6">
       <header className="space-y-2">
         <h1 className="text-2xl font-semibold">a5cforge</h1>
-        <p className="text-zinc-300">Local read-only UI (Phase 6).</p>
+        <p className="text-zinc-300">Git-first collaboration UI (issues, PRs, and activity) backed by `.collab/**`.</p>
       </header>
 
       <section className="grid gap-3 sm:grid-cols-2">
@@ -20,10 +20,14 @@ export default function HomePage() {
       </section>
 
       <section className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 text-sm text-zinc-300">
-        <div className="font-medium text-zinc-200">Repo selection</div>
+        <div className="font-medium text-zinc-200">Repo configuration</div>
         <div>
           Set <code className="rounded bg-zinc-800 px-1">A5C_REPO</code> (and optionally{" "}
           <code className="rounded bg-zinc-800 px-1">A5C_TREEISH</code>) in the environment for the UI process.
+        </div>
+        <div className="mt-2">
+          For a one-command local setup (temp repo + server + UI), run{" "}
+          <code className="rounded bg-zinc-800 px-1">node scripts/local-bringup.mjs</code>.
         </div>
       </section>
     </main>
