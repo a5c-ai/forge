@@ -77,12 +77,23 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
+          registry-url: https://registry.npmjs.org
+          always-auth: true
+          scope: '@a5c-ai'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Test (includes builds)
         run: pnpm test
+
+      - name: Update package version
+        run: pnpm pkg set version=${{ steps.version.outputs.new_version }} --dir packages/cli
+
+      - name: Publish package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm publish --dir packages/cli --access public --no-git-checks
 
       - name: Create tag
         env:
@@ -99,5 +110,7 @@ jobs:
           tag_name: ${{ steps.version.outputs.new_tag }}
           target_commitish: main
           generate_release_notes: true
+          body: |
+            Published to npm: https://www.npmjs.com/package/@a5c-ai/git-a5c
 
 
