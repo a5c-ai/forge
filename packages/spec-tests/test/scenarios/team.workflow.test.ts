@@ -17,7 +17,7 @@ import {
   writeIssueCreated,
   writePrEvent,
   writePrRequest
-} from "@a5cforge/sdk";
+} from "@a5c-ai/sdk";
 
 function run(cmd: string, args: string[], cwd: string): Promise<void> {
   return new Promise((resolve, reject) => {

@@ -12,7 +12,7 @@ import {
   writeCommentCreated,
   writeCommentEdited,
   writeCommentRedacted
-} from "@a5cforge/sdk";
+} from "@a5c-ai/sdk";
 
 export async function handleIssue(args: CommandArgs): Promise<number | undefined> {
   if (args.positionals[0] !== "issue") return;

@@ -1,4 +1,4 @@
-# @a5cforge/ui (Phase 6)
+# @a5c-ai/ui (Phase 6)
 
 Local read-only UI built with Next.js + Tailwind.
 

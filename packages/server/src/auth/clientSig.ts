@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import path from "node:path";
 import fs from "node:fs/promises";
 import type http from "node:http";
-import { jcsStringify } from "@a5cforge/sdk";
+import { jcsStringify } from "@a5c-ai/sdk";
 
 function sha256Hex(bytes: Buffer): string {
   return crypto.createHash("sha256").update(bytes).digest("hex");

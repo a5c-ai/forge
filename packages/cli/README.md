@@ -1,4 +1,4 @@
-# @a5cforge/cli
+# @a5c-ai/git-a5c
 
 CLI for reading and writing a5cforge events.
 
@@ -28,5 +28,4 @@ pnpm -C packages/cli build
 pnpm -C packages/cli link --global
 git a5c help
 ```
-
 

@@ -90,7 +90,34 @@ jobs:
       - name: Update package version
         run: npm pkg set version=${{ steps.version.outputs.new_version }} --prefix packages/cli
 
-      - name: Publish package
+      - name: Update SDK package version
+        run: npm pkg set version=${{ steps.version.outputs.new_version }} --prefix packages/sdk
+
+      - name: Update server package version
+        run: npm pkg set version=${{ steps.version.outputs.new_version }} --prefix packages/server
+
+      - name: Update UI package version
+        run: npm pkg set version=${{ steps.version.outputs.new_version }} --prefix apps/ui
+
+      - name: Publish SDK package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm publish packages/sdk --access public --no-git-checks
+
+      - name: Publish server package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm publish packages/server --access public --no-git-checks
+
+      - name: Publish UI package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm publish apps/ui --access public --no-git-checks
+
+      - name: Publish CLI package
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

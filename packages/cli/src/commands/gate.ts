@@ -1,6 +1,6 @@
 import type { CommandArgs } from "./types.js";
 import { git, gitConfigGet } from "../git.js";
-import { HlcClock, loadHlcState, saveHlcState, stageFiles, writeGateChanged } from "@a5cforge/sdk";
+import { HlcClock, loadHlcState, saveHlcState, stageFiles, writeGateChanged } from "@a5c-ai/sdk";
 
 export async function handleGate(args: CommandArgs): Promise<number | undefined> {
   if (args.positionals[0] !== "gate") return;

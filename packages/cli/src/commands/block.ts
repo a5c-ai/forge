@@ -1,6 +1,6 @@
 import type { CommandArgs } from "./types.js";
 import { git, gitConfigGet } from "../git.js";
-import { HlcClock, loadHlcState, saveHlcState, stageFiles, writeDepChanged } from "@a5cforge/sdk";
+import { HlcClock, loadHlcState, saveHlcState, stageFiles, writeDepChanged } from "@a5c-ai/sdk";
 
 export async function handleBlock(args: CommandArgs): Promise<number | undefined> {
   if (args.positionals[0] !== "block") return;

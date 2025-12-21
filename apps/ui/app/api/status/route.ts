@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getRepoConfigFromEnv } from "../_lib/config";
-import { loadSnapshot, openRepo, listIssues, listPRs } from "@a5cforge/sdk";
+import { loadSnapshot, openRepo, listIssues, listPRs } from "@a5c-ai/sdk";
 
 export async function GET() {
   try {

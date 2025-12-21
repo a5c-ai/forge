@@ -1,5 +1,5 @@
 import type { CommandArgs } from "./types.js";
-import { verify } from "@a5cforge/sdk";
+import { verify } from "@a5c-ai/sdk";
 
 export function handleVerify(args: CommandArgs): number | undefined {
   if (args.positionals[0] !== "verify") return;

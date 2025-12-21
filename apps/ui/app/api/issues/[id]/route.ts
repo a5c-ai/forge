@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getRepoConfigFromEnv } from "../../_lib/config";
-import { loadSnapshot, openRepo, renderIssue } from "@a5cforge/sdk";
+import { loadSnapshot, openRepo, renderIssue } from "@a5c-ai/sdk";
 
 export async function GET(_: Request, ctx: { params: Promise<{ id: string }> }) {
   try {

@@ -1,5 +1,5 @@
 import type { CommandArgs } from "./types.js";
-import { listIssues, listPRs } from "@a5cforge/sdk";
+import { listIssues, listPRs } from "@a5c-ai/sdk";
 
 export function handleStatus(args: CommandArgs): number | undefined {
   if (args.positionals[0] !== "status") return;

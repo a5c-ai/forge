@@ -3,7 +3,7 @@ import { readRaw, sendJson } from "../../http/io.js";
 import { parseJsonOrEmpty } from "../../http/json.js";
 import { verifyGitHubHmac } from "../../webhooks/github.js";
 import { writeToInboxRef } from "../../git/writeToInboxRef.js";
-import { HlcClock, loadHlcState, saveHlcState, writePrProposal } from "@a5cforge/sdk";
+import { HlcClock, loadHlcState, saveHlcState, writePrProposal } from "@a5c-ai/sdk";
 
 export async function handleV1GithubWebhook(args: {
   req: http.IncomingMessage;

@@ -1,7 +1,7 @@
 import "server-only";
 import path from "node:path";
 import { unstable_noStore as noStore } from "next/cache";
-import { loadSnapshot, openRepo, listIssues, listPRs, renderIssue, renderPR } from "@a5cforge/sdk";
+import { loadSnapshot, openRepo, listIssues, listPRs, renderIssue, renderPR } from "@a5c-ai/sdk";
 
 function getEnvRepo() {
   const repo = process.env.A5C_REPO;

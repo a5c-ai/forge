@@ -4,7 +4,7 @@ import os from "node:os";
 import fs from "node:fs/promises";
 import { spawn } from "node:child_process";
 import { createA5cServer } from "../src/server.js";
-import { loadSnapshot, openRepo, renderPR } from "@a5cforge/sdk";
+import { loadSnapshot, openRepo, renderPR } from "@a5c-ai/sdk";
 import crypto from "node:crypto";
 import http from "node:http";
 

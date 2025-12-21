@@ -6,7 +6,7 @@ import { handleV1Read } from "./routes/v1/readRoutes.js";
 import { handleV1Write } from "./routes/v1/writeRoutes.js";
 import { handleV1GithubWebhook } from "./routes/v1/githubWebhookRoute.js";
 import { handleV1GitRefUpdated } from "./routes/v1/gitRoutes.js";
-import { createLogger, createSnapshotCache } from "@a5cforge/sdk";
+import { createLogger, createSnapshotCache } from "@a5c-ai/sdk";
 
 export type ServerConfig = {
   repoRoot: string;

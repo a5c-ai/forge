@@ -1,13 +1,15 @@
 {
-  "name": "@a5cforge/server",
+  "name": "@a5c-ai/server",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -23,7 +25,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@a5cforge/sdk": "workspace:*"
+    "@a5c-ai/sdk": "workspace:*"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^2.1.8",

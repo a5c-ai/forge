@@ -5,7 +5,7 @@ import fs from "node:fs/promises";
 import fg from "fast-glob";
 import Ajv2020 from "ajv/dist/2020";
 import addFormats from "ajv-formats";
-import { HlcClock, writeIssueCreated, writeCommentCreated, writePrRequest } from "@a5cforge/sdk";
+import { HlcClock, writeIssueCreated, writeCommentCreated, writePrRequest } from "@a5c-ai/sdk";
 
 type KindMap = {
   schema: string;

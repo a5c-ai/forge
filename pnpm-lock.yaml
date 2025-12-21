@@ -35,7 +35,7 @@ importers:
 
   apps/ui:
     dependencies:
-      '@a5cforge/sdk':
+      '@a5c-ai/sdk':
         specifier: workspace:*
         version: link:../../packages/sdk
       next:
@@ -78,7 +78,7 @@ importers:
 
   packages/cli:
     dependencies:
-      '@a5cforge/sdk':
+      '@a5c-ai/sdk':
         specifier: workspace:*
         version: link:../sdk
     devDependencies:
@@ -112,7 +112,7 @@ importers:
 
   packages/server:
     dependencies:
-      '@a5cforge/sdk':
+      '@a5c-ai/sdk':
         specifier: workspace:*
         version: link:../sdk
     devDependencies:
@@ -128,7 +128,7 @@ importers:
 
   packages/spec-tests:
     devDependencies:
-      '@a5cforge/sdk':
+      '@a5c-ai/sdk':
         specifier: workspace:*
         version: link:../sdk
       '@vitest/coverage-v8':

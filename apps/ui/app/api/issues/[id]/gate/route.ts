@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getRepoConfigFromEnv } from "../../../_lib/config";
-import { HlcClock, loadHlcState, openRepo, saveHlcState, stageFiles, writeGateChanged } from "@a5cforge/sdk";
+import { HlcClock, loadHlcState, openRepo, saveHlcState, stageFiles, writeGateChanged } from "@a5c-ai/sdk";
 import { runGit } from "../../../_lib/gitRun";
 
 export async function POST(req: Request, ctx: { params: Promise<{ id: string }> }) {
@@ -47,5 +47,4 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     return NextResponse.json({ error: String(e?.message ?? e) }, { status: 400 });
   }
 }
-
 

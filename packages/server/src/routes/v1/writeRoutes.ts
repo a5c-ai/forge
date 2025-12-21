@@ -14,7 +14,7 @@ import {
   writeGateChanged,
   writePrProposal,
   writePrRequest
-} from "@a5cforge/sdk";
+} from "@a5c-ai/sdk";
 
 type Ctx = {
   req: http.IncomingMessage;

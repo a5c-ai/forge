@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import path from "node:path";
 import fs from "node:fs/promises";
 import { URL } from "node:url";
-import { jcsStringify } from "@a5cforge/sdk";
+import { jcsStringify } from "@a5c-ai/sdk";
 import { runGitCapture } from "../git/exec.js";
 
 export type WebhooksConfig = {

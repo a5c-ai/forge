@@ -8,7 +8,7 @@ import {
   stageFiles,
   writeAgentHeartbeat,
   writeAgentDispatchCreated
-} from "@a5cforge/sdk";
+} from "@a5c-ai/sdk";
 
 export async function handleAgent(args: CommandArgs): Promise<number | undefined> {
   if (args.positionals[0] !== "agent") return;
@@ -68,5 +68,3 @@ export async function handleAgent(args: CommandArgs): Promise<number | undefined
   args.io.writeLine(args.io.err, "usage: git a5c agent heartbeat|dispatch ...");
   return 2;
 }
-
-

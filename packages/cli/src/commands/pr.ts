@@ -11,7 +11,7 @@ import {
   writePrProposal,
   writePrRequest,
   writePrEvent
-} from "@a5cforge/sdk";
+} from "@a5c-ai/sdk";
 
 export async function handlePr(args: CommandArgs): Promise<number | undefined> {
   if (args.positionals[0] !== "pr") return;

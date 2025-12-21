@@ -1,6 +1,6 @@
 import type http from "node:http";
 import { sendJson } from "../../http/io.js";
-import { loadSnapshot, openRepo, renderIssue, renderPR, listIssues, listPRs, type SnapshotCache } from "@a5cforge/sdk";
+import { loadSnapshot, openRepo, renderIssue, renderPR, listIssues, listPRs, type SnapshotCache } from "@a5c-ai/sdk";
 
 export async function handleV1Read(args: {
   req: http.IncomingMessage;

@@ -1,6 +1,6 @@
 import { detectRepoRoot } from "./git.js";
 import { parseArgs } from "./args.js";
-import { createLogger, loadSnapshot, openRepo, parseLogLevel } from "@a5cforge/sdk";
+import { createLogger, loadSnapshot, openRepo, parseLogLevel } from "@a5c-ai/sdk";
 import type { CommandArgs } from "./commands/types.js";
 import { handleHelp } from "./commands/help.js";
 import { handleWebhook } from "./commands/webhook.js";
