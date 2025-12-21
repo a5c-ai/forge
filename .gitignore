@@ -7,3 +7,4 @@ apps/ui/.next/**
 packages/server/test/**/*.js
 
 .tmp/
+.env
