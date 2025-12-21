@@ -88,7 +88,7 @@ jobs:
         run: pnpm test
 
       - name: Update package version
-        run: pnpm pkg set version=${{ steps.version.outputs.new_version }} --dir packages/cli
+        run: npm pkg set version=${{ steps.version.outputs.new_version }} --prefix packages/cli
 
       - name: Publish package
         env:
