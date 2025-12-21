@@ -89,8 +89,16 @@ describe("Phase 1 - merge causality ordering", () => {
 
     // merge into main
     await run("git", ["checkout", "-q", "main"], dir);
-    await run("git", ["merge", "--no-edit", "--no-ff", "-q", "branch-a"], dir);
-    await run("git", ["merge", "--no-edit", "--no-ff", "-q", "branch-b"], dir);
+    await run(
+      "git",
+      ["-c", "user.name=test", "-c", "user.email=test@example.com", "merge", "--no-edit", "--no-ff", "-q", "branch-a"],
+      dir
+    );
+    await run(
+      "git",
+      ["-c", "user.name=test", "-c", "user.email=test@example.com", "merge", "--no-edit", "--no-ff", "-q", "branch-b"],
+      dir
+    );
 
     const files = await listCollabFiles(dir, "HEAD");
     const jsonFiles = files.filter((f) => f.endsWith(".json") || f.endsWith(".md"));
