@@ -93,7 +93,8 @@ jobs:
       - name: Publish package
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: pnpm publish --dir packages/cli --access public --no-git-checks
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm publish packages/cli --access public --no-git-checks
 
       - name: Create tag
         env:
