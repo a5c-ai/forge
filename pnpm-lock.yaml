@@ -81,6 +81,12 @@ importers:
       '@a5c-ai/sdk':
         specifier: workspace:*
         version: link:../sdk
+      '@a5c-ai/server':
+        specifier: workspace:*
+        version: link:../server
+      '@a5c-ai/ui':
+        specifier: workspace:*
+        version: link:../../apps/ui
     devDependencies:
       '@vitest/coverage-v8':
         specifier: ^2.1.8

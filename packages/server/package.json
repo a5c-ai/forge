@@ -20,7 +20,7 @@
     "a5c-server": "./dist/bin/a5c-server.js"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.json",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage"
   },

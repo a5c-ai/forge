@@ -2,16 +2,21 @@
   "name": "@a5c-ai/git-a5c",
   "version": "0.1.0",
   "type": "module",
+  "files": [
+    "dist"
+  ],
   "bin": {
     "git-a5c": "./dist/bin/git-a5c.js"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.json",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@a5c-ai/sdk": "workspace:*"
+    "@a5c-ai/sdk": "workspace:*",
+    "@a5c-ai/server": "workspace:*",
+    "@a5c-ai/ui": "workspace:*"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^2.1.8",
@@ -22,4 +27,3 @@
     "access": "public"
   }
 }
-
