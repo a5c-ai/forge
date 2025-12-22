@@ -11,6 +11,7 @@
     "next.config.mjs",
     "postcss.config.mjs",
     "tailwind.config.ts",
+    "tsconfig.base.json",
     "tsconfig.json"
   ],
   "publishConfig": {
