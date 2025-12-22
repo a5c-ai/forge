@@ -30,7 +30,7 @@ export function handleHelp(args: CommandArgs): number | undefined {
   writeLine(out, "  verify");
   writeLine(out, "  journal [--since <2h|2025-...>] [--limit N] [--types a,b] [--entity <id>] [--active]");
   writeLine(out, "  server [--port <port>] [--token <token>]");
-  writeLine(out, "  ui [dev|start|build|lint] [args]");
+  writeLine(out, "  ui [--port <port>]");
   writeLine(out, "  hooks install|uninstall");
   writeLine(out, "  webhook status");
   writeLine(out, "  webhook test --url <url> [--type <type>]");

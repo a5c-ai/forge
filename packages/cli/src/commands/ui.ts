@@ -1,13 +1,39 @@
 import { spawn } from "node:child_process";
+import fs from "node:fs";
 import path from "node:path";
-import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import type { CommandArgs } from "./types.js";
 
-const require = createRequire(import.meta.url);
-
 function hasHelpFlag(args: CommandArgs): boolean {
   return args.positionals.includes("--help") || args.positionals.includes("-h");
+}
+
+function findStandaloneServerJs(uiDir: string): string | undefined {
+  const candidates = [
+    path.join(uiDir, ".next", "standalone", "server.js"),
+    path.join(uiDir, ".next", "standalone", "apps", "ui", "server.js")
+  ];
+  for (const p of candidates) {
+    if (fs.existsSync(p)) return p;
+  }
+
+  const standaloneDir = path.join(uiDir, ".next", "standalone");
+  if (!fs.existsSync(standaloneDir)) return undefined;
+
+  const stack = [standaloneDir];
+  while (stack.length) {
+    const dir = stack.pop()!;
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const e of entries) {
+      if (e.isDirectory()) {
+        if (e.name === "node_modules") continue;
+        stack.push(path.join(dir, e.name));
+      } else if (e.isFile() && e.name === "server.js") {
+        return path.join(dir, e.name);
+      }
+    }
+  }
+  return undefined;
 }
 
 export async function handleUi(args: CommandArgs): Promise<number | undefined> {
@@ -15,7 +41,7 @@ export async function handleUi(args: CommandArgs): Promise<number | undefined> {
   if (cmd !== "ui") return;
 
   if (hasHelpFlag(args)) {
-    args.io.writeLine(args.io.out, "git a5c ui [dev|start|build|lint] [args]");
+    args.io.writeLine(args.io.out, "git a5c ui [--port <port>]");
     args.io.writeLine(args.io.out, "");
     args.io.writeLine(args.io.out, "Environment:");
     args.io.writeLine(args.io.out, "  A5C_REPO (auto-set to current repo)");
@@ -32,14 +58,21 @@ export async function handleUi(args: CommandArgs): Promise<number | undefined> {
 
   const uiPkgJson = fileURLToPath(import.meta.resolve("@a5c-ai/ui/package.json"));
   const uiDir = path.dirname(uiPkgJson);
-  const nextBin = require.resolve("next/dist/bin/next", { paths: [uiDir] });
+  const serverJs = findStandaloneServerJs(uiDir);
+  if (!serverJs) {
+    args.io.writeLine(
+      args.io.err,
+      "UI build not found. Reinstall after a release that publishes prebuilt UI assets (Next standalone output)."
+    );
+    return 1;
+  }
 
-  const nextArgv = args.positionals.slice(1);
-  const nextSubcommands = new Set(["dev", "start", "build", "lint", "telemetry", "info"]);
-  const nextArgs = nextArgv.length > 0 && nextSubcommands.has(nextArgv[0]!) ? nextArgv : ["dev", ...nextArgv];
+  if (Number.isFinite(args.flags.port)) {
+    process.env.PORT = String(args.flags.port);
+  }
 
-  const child = spawn(process.execPath, [nextBin, ...nextArgs], {
-    cwd: uiDir,
+  const child = spawn(process.execPath, [serverJs], {
+    cwd: path.dirname(serverJs),
     stdio: "inherit",
     env: { ...process.env, NEXT_TELEMETRY_DISABLED: process.env.NEXT_TELEMETRY_DISABLED ?? "1" }
   });
@@ -49,4 +82,3 @@ export async function handleUi(args: CommandArgs): Promise<number | undefined> {
   });
   return exitCode;
 }
-

@@ -3,14 +3,9 @@
   "version": "0.1.0",
   "type": "module",
   "files": [
-    "app",
-    "components",
-    "lib",
     "public",
-    "next-env.d.ts",
-    "next.config.mjs",
-    "postcss.config.mjs",
-    "tailwind.config.ts",
+    ".next/standalone",
+    ".next/static",
     "tsconfig.base.json",
     "tsconfig.json"
   ],
@@ -21,6 +16,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "prepack": "next build",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "e2e": "playwright test"
