@@ -3,6 +3,7 @@ import { RepoBanner } from "../../components/RepoBanner";
 import { UiErrorPanel } from "../../components/UiErrorPanel";
 import { getRenderedIssues } from "../../lib/serverRepo";
 import { Selectors } from "../../components/Selectors";
+import { IssueCreateForm } from "../../components/IssueCreateForm";
 
 export default async function IssuesPage(props: { searchParams?: Promise<Record<string, string | string[] | undefined>> }) {
   const sp = (await props.searchParams) ?? {};
@@ -26,6 +27,7 @@ export default async function IssuesPage(props: { searchParams?: Promise<Record<
       </div>
       <RepoBanner />
       <Selectors defaultTreeish={treeish} defaultInboxRefs={inbox} />
+      <IssueCreateForm />
 
       {loadError ? (
         <UiErrorPanel title="Unable to load issues" message="The UI could not read `.collab/**` from the configured repo." details={loadError} />
@@ -51,5 +53,4 @@ export default async function IssuesPage(props: { searchParams?: Promise<Record<
     </main>
   );
 }
-
 

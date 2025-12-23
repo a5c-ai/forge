@@ -2,6 +2,7 @@ import Link from "next/link";
 import { RepoBanner } from "../../components/RepoBanner";
 import { Selectors } from "../../components/Selectors";
 import { PrRequestForm } from "../../components/PrRequestForm";
+import { PrProposalForm } from "../../components/PrProposalForm";
 import { UiErrorPanel } from "../../components/UiErrorPanel";
 import { getRenderedPRs } from "../../lib/serverRepo";
 
@@ -27,7 +28,10 @@ export default async function PRsPage(props: { searchParams?: Promise<Record<str
       </div>
       <RepoBanner />
       <Selectors defaultTreeish={treeish} defaultInboxRefs={inbox} />
-      <PrRequestForm />
+      <div className="grid gap-4 lg:grid-cols-2">
+        <PrRequestForm />
+        <PrProposalForm />
+      </div>
       {loadError ? (
         <UiErrorPanel title="Unable to load PRs" message="The UI could not read `.collab/**` from the configured repo." details={loadError} />
       ) : null}
@@ -52,5 +56,4 @@ export default async function PRsPage(props: { searchParams?: Promise<Record<str
     </main>
   );
 }
-
 

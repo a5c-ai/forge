@@ -12,6 +12,7 @@ import {
   writeCommentCreated,
   writeDepChanged,
   writeGateChanged,
+  writeIssueCreated,
   writePrProposal,
   writePrRequest
 } from "@a5c-ai/sdk";
@@ -54,6 +55,35 @@ async function handleIssueComments({ req, res, repoRoot, pathname, searchParams 
   await maybeCommitAndEmit({ repoRoot: repo.root, actor, doCommit, message: msg, path: wr.path, event: wr.event });
 
   sendJson(res, 200, { path: wr.path, event: wr.event, committed: doCommit });
+  return true;
+}
+
+async function handleIssueCreate({ req, res, repoRoot, pathname, searchParams }: Ctx): Promise<boolean> {
+  const m = /^\/v1\/issues\/([^/]+)$/.exec(pathname);
+  if (req.method !== "POST" || !m) return false;
+
+  const issueId = decodeURIComponent(m[1]);
+  const body = await readJsonObject(req);
+  const { actor } = await resolveActorFromClientSig(repoRoot, req, body);
+  const title = String(body.title ?? "").trim();
+  const issueBody = body.body == null ? undefined : String(body.body);
+  if (!title.trim()) {
+    sendJson(res, 400, { error: "missing title" });
+    return true;
+  }
+
+  const repo = await openRepo(repoRoot);
+  const state = await loadHlcState(actor);
+  const clock = new HlcClock(state);
+  const time = new Date().toISOString();
+  const wr = await writeIssueCreated({ repoRoot: repo.root, actor, clock }, { issueId, title, body: issueBody, time });
+  await saveHlcState(actor, clock.now());
+
+  const doCommit = commitFlagFromQuery(searchParams.get("commit"));
+  const msg = String(body.message ?? `a5c: issue ${issueId} created`);
+  await maybeCommitAndEmit({ repoRoot: repo.root, actor, doCommit, message: msg, path: wr.path, event: wr.event });
+
+  sendJson(res, 200, { path: wr.path, event: wr.event, committed: doCommit, issueId });
   return true;
 }
 
@@ -258,6 +288,7 @@ async function handlePrClaim({ req, res, repoRoot, pathname, searchParams }: Ctx
 export async function handleV1Write(args: Ctx): Promise<boolean> {
   const handlers = [
     handleIssueComments,
+    handleIssueCreate,
     handlePrRequest,
     handlePrProposal,
     handleIssueGate,

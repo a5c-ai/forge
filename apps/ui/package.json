@@ -4,8 +4,7 @@
   "type": "module",
   "files": [
     "public",
-    ".next/standalone",
-    ".next/static",
+    ".next",
     "tsconfig.base.json",
     "tsconfig.json"
   ],

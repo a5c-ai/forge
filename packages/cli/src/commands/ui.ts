@@ -1,39 +1,13 @@
 import { spawn } from "node:child_process";
-import fs from "node:fs";
 import path from "node:path";
+import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import type { CommandArgs } from "./types.js";
 
+const require = createRequire(import.meta.url);
+
 function hasHelpFlag(args: CommandArgs): boolean {
   return args.positionals.includes("--help") || args.positionals.includes("-h");
-}
-
-function findStandaloneServerJs(uiDir: string): string | undefined {
-  const candidates = [
-    path.join(uiDir, ".next", "standalone", "server.js"),
-    path.join(uiDir, ".next", "standalone", "apps", "ui", "server.js")
-  ];
-  for (const p of candidates) {
-    if (fs.existsSync(p)) return p;
-  }
-
-  const standaloneDir = path.join(uiDir, ".next", "standalone");
-  if (!fs.existsSync(standaloneDir)) return undefined;
-
-  const stack = [standaloneDir];
-  while (stack.length) {
-    const dir = stack.pop()!;
-    const entries = fs.readdirSync(dir, { withFileTypes: true });
-    for (const e of entries) {
-      if (e.isDirectory()) {
-        if (e.name === "node_modules") continue;
-        stack.push(path.join(dir, e.name));
-      } else if (e.isFile() && e.name === "server.js") {
-        return path.join(dir, e.name);
-      }
-    }
-  }
-  return undefined;
 }
 
 export async function handleUi(args: CommandArgs): Promise<number | undefined> {
@@ -58,21 +32,14 @@ export async function handleUi(args: CommandArgs): Promise<number | undefined> {
 
   const uiPkgJson = fileURLToPath(import.meta.resolve("@a5c-ai/ui/package.json"));
   const uiDir = path.dirname(uiPkgJson);
-  const serverJs = findStandaloneServerJs(uiDir);
-  if (!serverJs) {
-    args.io.writeLine(
-      args.io.err,
-      "UI build not found. Reinstall after a release that publishes prebuilt UI assets (Next standalone output)."
-    );
-    return 1;
-  }
+  const nextBin = require.resolve("next/dist/bin/next", { paths: [uiDir] });
 
   if (Number.isFinite(args.flags.port)) {
     process.env.PORT = String(args.flags.port);
   }
 
-  const child = spawn(process.execPath, [serverJs], {
-    cwd: path.dirname(serverJs),
+  const child = spawn(process.execPath, [nextBin, "start"], {
+    cwd: uiDir,
     stdio: "inherit",
     env: { ...process.env, NEXT_TELEMETRY_DISABLED: process.env.NEXT_TELEMETRY_DISABLED ?? "1" }
   });
