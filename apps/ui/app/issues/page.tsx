@@ -10,6 +10,7 @@ export default async function IssuesPage(props: { searchParams?: Promise<Record<
   const treeish = typeof sp.treeish === "string" ? sp.treeish : undefined;
   const inbox = typeof sp.inbox === "string" ? sp.inbox : undefined;
   const inboxRefs = inbox ? inbox.split(",").map((s) => s.trim()).filter(Boolean) : undefined;
+  const defaultInbox = inbox ?? process.env.A5C_INBOX_REFS ?? "";
   let issues: any[] = [];
   let loadError: string | null = null;
   try {
@@ -26,7 +27,7 @@ export default async function IssuesPage(props: { searchParams?: Promise<Record<
         </Link>
       </div>
       <RepoBanner />
-      <Selectors defaultTreeish={treeish} defaultInboxRefs={inbox} />
+      <Selectors defaultTreeish={treeish} defaultInboxRefs={defaultInbox} />
       <IssueCreateForm />
 
       {loadError ? (
@@ -53,4 +54,3 @@ export default async function IssuesPage(props: { searchParams?: Promise<Record<
     </main>
   );
 }
-

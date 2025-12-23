@@ -11,6 +11,7 @@ export default async function PRsPage(props: { searchParams?: Promise<Record<str
   const treeish = typeof sp.treeish === "string" ? sp.treeish : undefined;
   const inbox = typeof sp.inbox === "string" ? sp.inbox : undefined;
   const inboxRefs = inbox ? inbox.split(",").map((s) => s.trim()).filter(Boolean) : undefined;
+  const defaultInbox = inbox ?? process.env.A5C_INBOX_REFS ?? "";
   let prs: any[] = [];
   let loadError: string | null = null;
   try {
@@ -27,7 +28,7 @@ export default async function PRsPage(props: { searchParams?: Promise<Record<str
         </Link>
       </div>
       <RepoBanner />
-      <Selectors defaultTreeish={treeish} defaultInboxRefs={inbox} />
+      <Selectors defaultTreeish={treeish} defaultInboxRefs={defaultInbox} />
       <div className="grid gap-4 lg:grid-cols-2">
         <PrRequestForm />
         <PrProposalForm />
@@ -56,4 +57,3 @@ export default async function PRsPage(props: { searchParams?: Promise<Record<str
     </main>
   );
 }
-

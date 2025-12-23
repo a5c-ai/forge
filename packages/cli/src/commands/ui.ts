@@ -26,9 +26,9 @@ export async function handleUi(args: CommandArgs): Promise<number | undefined> {
 
   process.env.A5C_REPO = args.repoRoot;
   process.env.A5C_TREEISH = args.treeish ?? "HEAD";
-  if (args.flags.inboxRefs?.length) {
-    process.env.A5C_INBOX_REFS = args.flags.inboxRefs.join(",");
-  }
+  const defaultInboxRef = "refs/a5c/inbox/ui";
+  const inboxRefs = args.flags.inboxRefs?.length ? args.flags.inboxRefs : undefined;
+  process.env.A5C_INBOX_REFS = inboxRefs?.join(",") ?? process.env.A5C_INBOX_REFS ?? defaultInboxRef;
 
   const uiPkgJson = fileURLToPath(import.meta.resolve("@a5c-ai/ui/package.json"));
   const uiDir = path.dirname(uiPkgJson);

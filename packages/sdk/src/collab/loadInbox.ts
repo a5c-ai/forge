@@ -29,7 +29,13 @@ export type InboxSnapshot = {
 };
 
 export async function loadInboxSnapshot(opts: { git: IGit; inboxRef: string; cache?: SnapshotCache }): Promise<InboxSnapshot> {
-  const commitOid = await opts.git.revParse(opts.inboxRef);
+  let commitOid: string;
+  try {
+    commitOid = await opts.git.revParse(opts.inboxRef);
+  } catch {
+    // Missing inbox ref: treat as empty inbox, not an error.
+    return { ref: opts.inboxRef, commitOid: "", collabEvents: [] };
+  }
 
   const cached = opts.cache?.getInbox<InboxSnapshot>(commitOid);
   if (cached) {
@@ -72,5 +78,4 @@ export async function loadInboxSnapshot(opts: { git: IGit; inboxRef: string; cac
   opts.cache?.setInbox(commitOid, snap);
   return snap;
 }
-
 

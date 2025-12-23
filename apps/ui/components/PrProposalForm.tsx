@@ -1,10 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 export function PrProposalForm() {
   const router = useRouter();
+  const sp = useSearchParams();
   const [prKey, setPrKey] = useState("");
   const [baseRef, setBaseRef] = useState("main");
   const [headRef, setHeadRef] = useState("");
@@ -22,10 +23,13 @@ export function PrProposalForm() {
         if (!prKey.trim() || !baseRef.trim() || !headRef.trim() || !title.trim()) return;
         setBusy(true);
         try {
+          const treeish = sp.get("treeish") ?? undefined;
+          const inbox = sp.get("inbox") ?? undefined;
+          const inboxRefs = inbox ? inbox.split(",").map((s) => s.trim()).filter(Boolean) : undefined;
           const res = await fetch(`/api/prs/${encodeURIComponent(prKey.trim())}/proposal`, {
             method: "POST",
             headers: { "content-type": "application/json" },
-            body: JSON.stringify({ baseRef: baseRef.trim(), headRef: headRef.trim(), title: title.trim(), body: body.trim() || undefined })
+            body: JSON.stringify({ treeish, inboxRefs, baseRef: baseRef.trim(), headRef: headRef.trim(), title: title.trim(), body: body.trim() || undefined })
           });
           const j = await res.json().catch(() => ({}));
           if (!res.ok) throw new Error(j?.error ?? `HTTP ${res.status}`);
@@ -98,4 +102,3 @@ export function PrProposalForm() {
     </form>
   );
 }
-

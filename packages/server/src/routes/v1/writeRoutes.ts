@@ -3,6 +3,8 @@ import { sendJson } from "../../http/io.js";
 import { readJsonObject } from "../../http/json.js";
 import { resolveActorFromClientSig } from "../../auth/clientSig.js";
 import { maybeCommitAndEmit } from "../../git/commitAndEmit.js";
+import { withWorktree } from "../../git/worktree.js";
+import { writeToInboxRef } from "../../git/writeToInboxRef.js";
 import {
   HlcClock,
   loadHlcState,
@@ -72,16 +74,33 @@ async function handleIssueCreate({ req, res, repoRoot, pathname, searchParams }:
     return true;
   }
 
-  const repo = await openRepo(repoRoot);
-  const state = await loadHlcState(actor);
-  const clock = new HlcClock(state);
-  const time = new Date().toISOString();
-  const wr = await writeIssueCreated({ repoRoot: repo.root, actor, clock }, { issueId, title, body: issueBody, time });
-  await saveHlcState(actor, clock.now());
-
   const doCommit = commitFlagFromQuery(searchParams.get("commit"));
+  const ref = searchParams.get("ref");
+  const isInboxRef = !!ref && ref.startsWith("refs/a5c/");
+
+  const writeIn = async (root: string) => {
+    const repo = await openRepo(root);
+    const state = await loadHlcState(actor);
+    const clock = new HlcClock(state);
+    const time = new Date().toISOString();
+    const wr = await writeIssueCreated({ repoRoot: repo.root, actor, clock }, { issueId, title, body: issueBody, time });
+    await saveHlcState(actor, clock.now());
+    return wr;
+  };
+
   const msg = String(body.message ?? `a5c: issue ${issueId} created`);
-  await maybeCommitAndEmit({ repoRoot: repo.root, actor, doCommit, message: msg, path: wr.path, event: wr.event });
+  const commitIn = async (root: string) => {
+    const wr = await writeIn(root);
+    await maybeCommitAndEmit({ repoRoot: root, actor, doCommit, message: msg, path: wr.path, event: wr.event });
+    return wr;
+  };
+
+  const wr =
+    ref && doCommit && isInboxRef
+      ? (await writeToInboxRef(repoRoot, ref, { actor, message: msg, fn: writeIn })).result
+      : ref && doCommit
+        ? await withWorktree(repoRoot, ref, commitIn)
+        : await commitIn(repoRoot);
 
   sendJson(res, 200, { path: wr.path, event: wr.event, committed: doCommit, issueId });
   return true;
@@ -106,16 +125,33 @@ async function handlePrRequest({ req, res, repoRoot, pathname, searchParams }: C
     return true;
   }
 
-  const repo = await openRepo(repoRoot);
-  const state = await loadHlcState(actor);
-  const clock = new HlcClock(state);
-  const time = new Date().toISOString();
-  const wr = await writePrRequest({ repoRoot: repo.root, actor, clock }, { prKey, baseRef, title, body: prBody, time });
-  await saveHlcState(actor, clock.now());
-
   const doCommit = commitFlagFromQuery(searchParams.get("commit"));
+  const ref = searchParams.get("ref");
+  const isInboxRef = !!ref && ref.startsWith("refs/a5c/");
+
+  const writeIn = async (root: string) => {
+    const repo = await openRepo(root);
+    const state = await loadHlcState(actor);
+    const clock = new HlcClock(state);
+    const time = new Date().toISOString();
+    const wr = await writePrRequest({ repoRoot: repo.root, actor, clock }, { prKey, baseRef, title, body: prBody, time });
+    await saveHlcState(actor, clock.now());
+    return wr;
+  };
+
   const msg = String(body.message ?? `a5c: pr request ${prKey}`);
-  await maybeCommitAndEmit({ repoRoot: repo.root, actor, doCommit, message: msg, path: wr.path, event: wr.event });
+  const commitIn = async (root: string) => {
+    const wr = await writeIn(root);
+    await maybeCommitAndEmit({ repoRoot: root, actor, doCommit, message: msg, path: wr.path, event: wr.event });
+    return wr;
+  };
+
+  const wr =
+    ref && doCommit && isInboxRef
+      ? (await writeToInboxRef(repoRoot, ref, { actor, message: msg, fn: writeIn })).result
+      : ref && doCommit
+        ? await withWorktree(repoRoot, ref, commitIn)
+        : await commitIn(repoRoot);
 
   sendJson(res, 200, { path: wr.path, event: wr.event, committed: doCommit });
   return true;
@@ -145,16 +181,33 @@ async function handlePrProposal({ req, res, repoRoot, pathname, searchParams }: 
     return true;
   }
 
-  const repo = await openRepo(repoRoot);
-  const state = await loadHlcState(actor);
-  const clock = new HlcClock(state);
-  const time = new Date().toISOString();
-  const wr = await writePrProposal({ repoRoot: repo.root, actor, clock }, { prKey, baseRef, headRef, title, body: prBody, time });
-  await saveHlcState(actor, clock.now());
-
   const doCommit = commitFlagFromQuery(searchParams.get("commit"));
+  const ref = searchParams.get("ref");
+  const isInboxRef = !!ref && ref.startsWith("refs/a5c/");
+
+  const writeIn = async (root: string) => {
+    const repo = await openRepo(root);
+    const state = await loadHlcState(actor);
+    const clock = new HlcClock(state);
+    const time = new Date().toISOString();
+    const wr = await writePrProposal({ repoRoot: repo.root, actor, clock }, { prKey, baseRef, headRef, title, body: prBody, time });
+    await saveHlcState(actor, clock.now());
+    return wr;
+  };
+
   const msg = String(body.message ?? `a5c: pr proposal ${prKey}`);
-  await maybeCommitAndEmit({ repoRoot: repo.root, actor, doCommit, message: msg, path: wr.path, event: wr.event });
+  const commitIn = async (root: string) => {
+    const wr = await writeIn(root);
+    await maybeCommitAndEmit({ repoRoot: root, actor, doCommit, message: msg, path: wr.path, event: wr.event });
+    return wr;
+  };
+
+  const wr =
+    ref && doCommit && isInboxRef
+      ? (await writeToInboxRef(repoRoot, ref, { actor, message: msg, fn: writeIn })).result
+      : ref && doCommit
+        ? await withWorktree(repoRoot, ref, commitIn)
+        : await commitIn(repoRoot);
 
   sendJson(res, 200, { path: wr.path, event: wr.event, committed: doCommit });
   return true;

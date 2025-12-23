@@ -16,6 +16,21 @@ export function run(cmd: string, args: string[], cwd: string): Promise<void> {
   });
 }
 
+export function runCapture(cmd: string, args: string[], cwd: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(cmd, args, { cwd, stdio: ["ignore", "pipe", "pipe"], windowsHide: true });
+    const out: Buffer[] = [];
+    const err: Buffer[] = [];
+    child.stdout.on("data", (d) => out.push(Buffer.from(d)));
+    child.stderr.on("data", (d) => err.push(Buffer.from(d)));
+    child.on("error", reject);
+    child.on("close", (code) => {
+      if (code === 0) return resolve(Buffer.concat(out).toString("utf8"));
+      reject(new Error(`${cmd} ${args.join(" ")} failed (code=${code}): ${Buffer.concat(err).toString("utf8")}`));
+    });
+  });
+}
+
 export async function copyDir(src: string, dst: string) {
   await fs.mkdir(dst, { recursive: true });
   const entries = await fs.readdir(src, { withFileTypes: true });

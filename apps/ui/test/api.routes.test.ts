@@ -1,13 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { GET as statusGET } from "../app/api/status/route";
 import { GET as issuesGET } from "../app/api/issues/route";
+import { POST as issuesPOST } from "../app/api/issues/route";
 import { POST as commentPOST } from "../app/api/issues/[id]/comments/route";
 import { POST as prRequestPOST } from "../app/api/prs/[key]/request/route";
+import { POST as prProposalPOST } from "../app/api/prs/[key]/proposal/route";
 import { POST as issueGatePOST } from "../app/api/issues/[id]/gate/route";
 import { POST as issueBlockersPOST } from "../app/api/issues/[id]/blockers/route";
 import { POST as issueClaimPOST } from "../app/api/issues/[id]/claim/route";
 import { POST as prClaimPOST } from "../app/api/prs/[key]/claim/route";
-import { makeRepoFromFixture } from "./_util.js";
+import { makeRepoFromFixture, runCapture } from "./_util.js";
 
 describe("UI API routes (Phase 6)", () => {
   it("GET /api/status returns counts", async () => {
@@ -83,6 +85,76 @@ describe("UI API routes (Phase 6)", () => {
     );
     const pr = await prRes.json();
     expect(pr).toMatchObject({ prKey: "pr-req-1", kind: "request", baseRef: "main", title: "Request: UI test" });
+  });
+
+  it("POST /api/issues and PR writes go to inbox ref (not checked-out branch)", async () => {
+    const repo = await makeRepoFromFixture("repo-basic");
+    process.env.A5C_REPO = repo;
+    process.env.A5C_TREEISH = "HEAD";
+    process.env.A5C_ACTOR = "alice";
+    delete process.env.A5C_REMOTE_URL;
+    delete process.env.A5C_REMOTE_TOKEN;
+
+    const inboxRef = "refs/a5c/inbox/ui-test";
+    const mainBefore = (await runCapture("git", ["rev-parse", "main"], repo)).trim();
+
+    const issueReq = new Request("http://local/api/issues", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ title: "Inbox issue", inboxRefs: [inboxRef], treeish: "main" })
+    });
+    const issueRes = await issuesPOST(issueReq);
+    expect(issueRes.status).toBe(200);
+    const issueJson = await issueRes.json();
+    expect(issueJson).toMatchObject({ committed: true });
+
+    const prReq = new Request("http://local/api/prs/pr-inbox-1/request", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ baseRef: "main", title: "Inbox PR request", inboxRefs: [inboxRef], treeish: "main" })
+    });
+    const prRes = await prRequestPOST(prReq, { params: Promise.resolve({ key: "pr-inbox-1" }) } as any);
+    expect(prRes.status).toBe(200);
+
+    const prPropReq = new Request("http://local/api/prs/pr-inbox-2/proposal", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ baseRef: "main", headRef: "feature/x", title: "Inbox PR proposal", inboxRefs: [inboxRef], treeish: "main" })
+    });
+    const prPropRes = await prProposalPOST(prPropReq, { params: Promise.resolve({ key: "pr-inbox-2" }) } as any);
+    expect(prPropRes.status).toBe(200);
+
+    const mainAfter = (await runCapture("git", ["rev-parse", "main"], repo)).trim();
+    expect(mainAfter).toBe(mainBefore);
+
+    const inboxCommit = (await runCapture("git", ["rev-parse", inboxRef], repo)).trim();
+    expect(inboxCommit).not.toBe(mainBefore);
+
+    // Ensure the inbox commit includes the written events (don’t rely on returned paths).
+    const paths = (await runCapture("git", ["ls-tree", "-r", "--name-only", inboxRef], repo))
+      .split(/\r?\n/)
+      .filter(Boolean);
+
+    const issueId = String(issueJson.issueId ?? "");
+    expect(issueId.startsWith("issue-")).toBe(true);
+    const issueCreatedPath = paths.find(
+      (p) => p.startsWith(`.collab/issues/${issueId}/events/`) && p.endsWith(".issue.event.created.json")
+    );
+    expect(issueCreatedPath).toBeTruthy();
+    const issueContents = await runCapture("git", ["show", `${inboxRef}:${issueCreatedPath}`], repo);
+    expect(issueContents).toContain("issue.event.created");
+
+    const prReqPath = paths.find((p) => p.startsWith(".collab/prs/pr-inbox-1/events/") && p.endsWith(".pr.request.created.json"));
+    expect(prReqPath).toBeTruthy();
+    const prReqContents = await runCapture("git", ["show", `${inboxRef}:${prReqPath}`], repo);
+    expect(prReqContents).toContain("pr.request.created");
+
+    const prPropPath = paths.find(
+      (p) => p.startsWith(".collab/prs/pr-inbox-2/events/") && p.endsWith(".pr.proposal.created.json")
+    );
+    expect(prPropPath).toBeTruthy();
+    const prPropContents = await runCapture("git", ["show", `${inboxRef}:${prPropPath}`], repo);
+    expect(prPropContents).toContain("pr.proposal.created");
   });
 
   it("POST /api/issues/[id]/gate and /blockers update rendered issue", async () => {

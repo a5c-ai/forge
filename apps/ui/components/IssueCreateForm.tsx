@@ -1,10 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 export function IssueCreateForm() {
   const router = useRouter();
+  const sp = useSearchParams();
   const [issueId, setIssueId] = useState("");
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -20,10 +21,15 @@ export function IssueCreateForm() {
         if (!title.trim()) return;
         setBusy(true);
         try {
+          const treeish = sp.get("treeish") ?? undefined;
+          const inbox = sp.get("inbox") ?? undefined;
+          const inboxRefs = inbox ? inbox.split(",").map((s) => s.trim()).filter(Boolean) : undefined;
           const res = await fetch(`/api/issues`, {
             method: "POST",
             headers: { "content-type": "application/json" },
             body: JSON.stringify({
+              treeish,
+              inboxRefs,
               issueId: issueId.trim() || undefined,
               title: title.trim(),
               body: body.trim() || undefined
@@ -79,4 +85,3 @@ export function IssueCreateForm() {
     </form>
   );
 }
-

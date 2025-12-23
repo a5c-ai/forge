@@ -103,25 +103,25 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: pnpm publish packages/sdk --access public --no-git-checks
+        run: pnpm -C packages/sdk publish --access public --no-git-checks
 
       - name: Publish server package
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: pnpm publish packages/server --access public --no-git-checks
+        run: pnpm -C packages/server publish --access public --no-git-checks
 
       - name: Publish UI package
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: pnpm publish apps/ui --access public --no-git-checks
+        run: pnpm -C apps/ui publish --access public --no-git-checks
 
       - name: Publish CLI package
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: pnpm publish packages/cli --access public --no-git-checks
+        run: pnpm -C packages/cli publish --access public --no-git-checks
 
       - name: Create tag
         env:

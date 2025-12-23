@@ -44,12 +44,16 @@ export async function handleV1GithubWebhook(args: {
   const actor = String(sender?.login ?? "github");
   const time = String(pr?.created_at ?? new Date().toISOString());
 
-  const { result, commit } = await writeToInboxRef(repoRoot, inboxRef, async (worktreeDir) => {
-    const state = await loadHlcState(actor);
-    const clock = new HlcClock(state);
-    const wr = await writePrProposal({ repoRoot: worktreeDir, actor, clock }, { prKey, baseRef, headRef, title, body, time });
-    await saveHlcState(actor, clock.now());
-    return wr;
+  const { result, commit } = await writeToInboxRef(repoRoot, inboxRef, {
+    actor,
+    message: `a5c: github pr ${prKey}`,
+    fn: async (worktreeDir) => {
+      const state = await loadHlcState(actor);
+      const clock = new HlcClock(state);
+      const wr = await writePrProposal({ repoRoot: worktreeDir, actor, clock }, { prKey, baseRef, headRef, title, body, time });
+      await saveHlcState(actor, clock.now());
+      return wr;
+    }
   });
 
   sendJson(res, 200, { ok: true, inboxRef, commit, path: (result as any).path });

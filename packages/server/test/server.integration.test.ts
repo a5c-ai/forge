@@ -254,6 +254,41 @@ describe("a5c-server (Phase 7)", () => {
     }
   });
 
+  it("writes issue/pr events to inbox ref without moving main", async () => {
+    const repo = await makeRepoFromFixture("repo-basic");
+    process.env.A5C_SERVER_REPO = repo;
+    delete process.env.A5C_SERVER_TOKEN;
+
+    const mainBefore = (await runCapture("git", ["rev-parse", "main"], repo)).trim();
+    const inboxRef = "refs/a5c/inbox/server-test";
+
+    const srv = createA5cServer();
+    const port = await srv.listen(0);
+    try {
+      const base = `http://127.0.0.1:${port}`;
+      const issuePost = await fetch(`${base}/v1/issues/issue-inbox-1?ref=${encodeURIComponent(inboxRef)}`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ actor: "alice", title: "From inbox" })
+      }).then((r) => r.json());
+      expect(issuePost).toMatchObject({ committed: true, issueId: "issue-inbox-1" });
+
+      const prPost = await fetch(`${base}/v1/prs/pr-inbox-1/request?ref=${encodeURIComponent(inboxRef)}`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ actor: "alice", baseRef: "main", title: "Inbox request" })
+      }).then((r) => r.json());
+      expect(prPost).toMatchObject({ committed: true });
+    } finally {
+      await srv.close();
+    }
+
+    const mainAfter = (await runCapture("git", ["rev-parse", "main"], repo)).trim();
+    expect(mainAfter).toBe(mainBefore);
+    const inboxCommit = (await runCapture("git", ["rev-parse", inboxRef], repo)).trim();
+    expect(inboxCommit).not.toBe(mainBefore);
+  });
+
   it("delivers outgoing a5cforge webhooks on committed writes (signed)", async () => {
     const repo = await makeRepoFromFixture("repo-basic");
 
