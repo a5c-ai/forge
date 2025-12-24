@@ -1,10 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 export function IssueGateForm(props: { issueId: string; current?: { topic?: string; message?: string } }) {
   const router = useRouter();
+  const sp = useSearchParams();
   const [needsHuman, setNeedsHuman] = useState(Boolean(props.current));
   const [topic, setTopic] = useState(props.current?.topic ?? "");
   const [message, setMessage] = useState(props.current?.message ?? "");
@@ -19,10 +20,13 @@ export function IssueGateForm(props: { issueId: string; current?: { topic?: stri
         setErr(null);
         setBusy(true);
         try {
+          const inbox = sp.get("inbox") ?? undefined;
+          const inboxRefs = inbox ? inbox.split(",").map((s) => s.trim()).filter(Boolean) : undefined;
           const res = await fetch(`/api/issues/${encodeURIComponent(props.issueId)}/gate`, {
             method: "POST",
             headers: { "content-type": "application/json" },
             body: JSON.stringify({
+              inboxRefs,
               needsHuman,
               topic: needsHuman ? topic.trim() || undefined : undefined,
               message: needsHuman ? message.trim() || undefined : undefined
@@ -80,5 +84,4 @@ export function IssueGateForm(props: { issueId: string; current?: { topic?: stri
     </form>
   );
 }
-
 

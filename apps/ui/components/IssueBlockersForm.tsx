@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 export function IssueBlockersForm(props: {
@@ -8,6 +8,7 @@ export function IssueBlockersForm(props: {
   blockers?: { by: { type: "issue" | "pr"; id: string }; note?: string }[];
 }) {
   const router = useRouter();
+  const sp = useSearchParams();
   const [byType, setByType] = useState<"issue" | "pr">("issue");
   const [byId, setById] = useState("");
   const [note, setNote] = useState("");
@@ -15,10 +16,12 @@ export function IssueBlockersForm(props: {
   const [err, setErr] = useState<string | null>(null);
 
   async function post(op: "add" | "remove", payload: any) {
+    const inbox = sp.get("inbox") ?? undefined;
+    const inboxRefs = inbox ? inbox.split(",").map((s) => s.trim()).filter(Boolean) : undefined;
     const res = await fetch(`/api/issues/${encodeURIComponent(props.issueId)}/blockers`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ op, ...payload })
+      body: JSON.stringify({ op, inboxRefs, ...payload })
     });
     const j = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(j?.error ?? `HTTP ${res.status}`);

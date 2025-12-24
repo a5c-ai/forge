@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 export function ClaimForm(props: {
@@ -9,6 +9,7 @@ export function ClaimForm(props: {
   claims?: { agentId: string; by: string; time: string; note?: string }[];
 }) {
   const router = useRouter();
+  const sp = useSearchParams();
   const [agentId, setAgentId] = useState("");
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
@@ -19,10 +20,12 @@ export function ClaimForm(props: {
       props.kind === "issue"
         ? `/api/issues/${encodeURIComponent(props.id)}/claim`
         : `/api/prs/${encodeURIComponent(props.id)}/claim`;
+    const inbox = sp.get("inbox") ?? undefined;
+    const inboxRefs = inbox ? inbox.split(",").map((s) => s.trim()).filter(Boolean) : undefined;
     const res = await fetch(url, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ op, ...payload })
+      body: JSON.stringify({ op, inboxRefs, ...payload })
     });
     const j = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(j?.error ?? `HTTP ${res.status}`);

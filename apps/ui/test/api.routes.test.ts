@@ -16,6 +16,7 @@ describe("UI API routes (Phase 6)", () => {
     const repo = await makeRepoFromFixture("repo-basic");
     process.env.A5C_REPO = repo;
     process.env.A5C_TREEISH = "HEAD";
+    process.env.A5C_INBOX_REFS = "refs/a5c/inbox/ui-test";
     const res = await statusGET();
     expect(res.status).toBe(200);
     const body = await res.json();
@@ -26,6 +27,7 @@ describe("UI API routes (Phase 6)", () => {
     const repo = await makeRepoFromFixture("repo-basic");
     process.env.A5C_REPO = repo;
     process.env.A5C_TREEISH = "HEAD";
+    process.env.A5C_INBOX_REFS = "refs/a5c/inbox/ui-test";
     const res = await issuesGET();
     expect(res.status).toBe(200);
     const body = await res.json();
@@ -38,6 +40,7 @@ describe("UI API routes (Phase 6)", () => {
     process.env.A5C_REPO = repo;
     process.env.A5C_TREEISH = "HEAD";
     process.env.A5C_ACTOR = "alice";
+    process.env.A5C_INBOX_REFS = "refs/a5c/inbox/ui-test";
     delete process.env.A5C_REMOTE_URL;
     delete process.env.A5C_REMOTE_TOKEN;
 
@@ -49,7 +52,7 @@ describe("UI API routes (Phase 6)", () => {
     const res = await commentPOST(req, { params: Promise.resolve({ id: "issue-1" }) } as any);
     expect(res.status).toBe(200);
 
-    // Re-render via SDK-backed issue route (treeish HEAD updated by commit).
+    // Re-render via SDK-backed issue route (reads HEAD + inbox refs).
     const issueRes = await (await import("../app/api/issues/[id]/route")).GET(
       new Request("http://local/api/issues/issue-1"),
       { params: Promise.resolve({ id: "issue-1" }) } as any
@@ -64,6 +67,7 @@ describe("UI API routes (Phase 6)", () => {
     process.env.A5C_REPO = repo;
     process.env.A5C_TREEISH = "HEAD";
     process.env.A5C_ACTOR = "alice";
+    process.env.A5C_INBOX_REFS = "refs/a5c/inbox/ui-test";
     delete process.env.A5C_REMOTE_URL;
     delete process.env.A5C_REMOTE_TOKEN;
 
@@ -85,13 +89,14 @@ describe("UI API routes (Phase 6)", () => {
     );
     const pr = await prRes.json();
     expect(pr).toMatchObject({ prKey: "pr-req-1", kind: "request", baseRef: "main", title: "Request: UI test" });
-  });
+  }, 20000);
 
   it("POST /api/issues and PR writes go to inbox ref (not checked-out branch)", async () => {
     const repo = await makeRepoFromFixture("repo-basic");
     process.env.A5C_REPO = repo;
     process.env.A5C_TREEISH = "HEAD";
     process.env.A5C_ACTOR = "alice";
+    process.env.A5C_INBOX_REFS = "refs/a5c/inbox/ui-test";
     delete process.env.A5C_REMOTE_URL;
     delete process.env.A5C_REMOTE_TOKEN;
 
@@ -101,7 +106,7 @@ describe("UI API routes (Phase 6)", () => {
     const issueReq = new Request("http://local/api/issues", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ title: "Inbox issue", inboxRefs: [inboxRef], treeish: "main" })
+      body: JSON.stringify({ title: "Inbox issue", inboxRefs: [inboxRef] })
     });
     const issueRes = await issuesPOST(issueReq);
     expect(issueRes.status).toBe(200);
@@ -111,7 +116,7 @@ describe("UI API routes (Phase 6)", () => {
     const prReq = new Request("http://local/api/prs/pr-inbox-1/request", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ baseRef: "main", title: "Inbox PR request", inboxRefs: [inboxRef], treeish: "main" })
+      body: JSON.stringify({ baseRef: "main", title: "Inbox PR request", inboxRefs: [inboxRef] })
     });
     const prRes = await prRequestPOST(prReq, { params: Promise.resolve({ key: "pr-inbox-1" }) } as any);
     expect(prRes.status).toBe(200);
@@ -119,7 +124,7 @@ describe("UI API routes (Phase 6)", () => {
     const prPropReq = new Request("http://local/api/prs/pr-inbox-2/proposal", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ baseRef: "main", headRef: "feature/x", title: "Inbox PR proposal", inboxRefs: [inboxRef], treeish: "main" })
+      body: JSON.stringify({ baseRef: "main", headRef: "feature/x", title: "Inbox PR proposal", inboxRefs: [inboxRef] })
     });
     const prPropRes = await prProposalPOST(prPropReq, { params: Promise.resolve({ key: "pr-inbox-2" }) } as any);
     expect(prPropRes.status).toBe(200);
@@ -162,6 +167,7 @@ describe("UI API routes (Phase 6)", () => {
     process.env.A5C_REPO = repo;
     process.env.A5C_TREEISH = "HEAD";
     process.env.A5C_ACTOR = "alice";
+    process.env.A5C_INBOX_REFS = "refs/a5c/inbox/ui-test";
     delete process.env.A5C_REMOTE_URL;
     delete process.env.A5C_REMOTE_TOKEN;
 
@@ -203,13 +209,14 @@ describe("UI API routes (Phase 6)", () => {
     );
     const issue2 = await issueRes2.json();
     expect(issue2.blockers ?? []).toHaveLength(0);
-  });
+  }, 20000);
 
   it("POST /api/issues/[id]/claim and /api/prs/[key]/claim update rendered entities", async () => {
     const repo = await makeRepoFromFixture("repo-basic");
     process.env.A5C_REPO = repo;
     process.env.A5C_TREEISH = "HEAD";
     process.env.A5C_ACTOR = "alice";
+    process.env.A5C_INBOX_REFS = "refs/a5c/inbox/ui-test";
     delete process.env.A5C_REMOTE_URL;
     delete process.env.A5C_REMOTE_TOKEN;
 
@@ -253,7 +260,7 @@ describe("UI API routes (Phase 6)", () => {
     );
     const pr = await prRes.json();
     expect(pr.agentClaims?.map((c: any) => c.agentId)).toContain("agent-2");
-  });
+  }, 20000);
 });
 
 

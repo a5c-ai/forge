@@ -1,10 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 export function CommentForm(props: { issueId: string }) {
   const router = useRouter();
+  const sp = useSearchParams();
   const [body, setBody] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -18,10 +19,12 @@ export function CommentForm(props: { issueId: string }) {
         if (!body.trim()) return;
         setBusy(true);
         try {
+          const inbox = sp.get("inbox") ?? undefined;
+          const inboxRefs = inbox ? inbox.split(",").map((s) => s.trim()).filter(Boolean) : undefined;
           const res = await fetch(`/api/issues/${encodeURIComponent(props.issueId)}/comments`, {
             method: "POST",
             headers: { "content-type": "application/json" },
-            body: JSON.stringify({ body })
+            body: JSON.stringify({ body, inboxRefs })
           });
           if (!res.ok) {
             const j = await res.json().catch(() => ({}));

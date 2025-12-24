@@ -23,17 +23,17 @@ export function PrProposalForm() {
         if (!prKey.trim() || !baseRef.trim() || !headRef.trim() || !title.trim()) return;
         setBusy(true);
         try {
-          const treeish = sp.get("treeish") ?? undefined;
           const inbox = sp.get("inbox") ?? undefined;
           const inboxRefs = inbox ? inbox.split(",").map((s) => s.trim()).filter(Boolean) : undefined;
           const res = await fetch(`/api/prs/${encodeURIComponent(prKey.trim())}/proposal`, {
             method: "POST",
             headers: { "content-type": "application/json" },
-            body: JSON.stringify({ treeish, inboxRefs, baseRef: baseRef.trim(), headRef: headRef.trim(), title: title.trim(), body: body.trim() || undefined })
+            body: JSON.stringify({ inboxRefs, baseRef: baseRef.trim(), headRef: headRef.trim(), title: title.trim(), body: body.trim() || undefined })
           });
           const j = await res.json().catch(() => ({}));
           if (!res.ok) throw new Error(j?.error ?? `HTTP ${res.status}`);
-          router.push(`/prs/${encodeURIComponent(prKey.trim())}`);
+          const qs = inbox ? `?inbox=${encodeURIComponent(inbox)}` : "";
+          router.push(`/prs/${encodeURIComponent(prKey.trim())}${qs}`);
           router.refresh();
         } catch (err2: any) {
           setErr(String(err2?.message ?? err2));

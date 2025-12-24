@@ -11,25 +11,23 @@ function normalizeCsv(s: string): string {
     .join(",");
 }
 
-export function Selectors(props: { defaultTreeish?: string; defaultInboxRefs?: string }) {
+export function Selectors(props: { defaultInboxRefs?: string }) {
   const sp = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
 
-  const initialTreeish = sp.get("treeish") ?? props.defaultTreeish ?? "HEAD";
   const initialInbox = sp.get("inbox") ?? props.defaultInboxRefs ?? "";
 
-  const [treeish, setTreeish] = useState(initialTreeish);
   const [inbox, setInbox] = useState(initialInbox);
 
   const query = useMemo(() => {
     const q = new URLSearchParams(sp.toString());
-    q.set("treeish", treeish.trim() || "HEAD");
+    q.delete("treeish");
     const inboxNorm = normalizeCsv(inbox);
     if (inboxNorm) q.set("inbox", inboxNorm);
     else q.delete("inbox");
     return q.toString();
-  }, [sp, treeish, inbox]);
+  }, [sp, inbox]);
 
   return (
     <form
@@ -39,15 +37,6 @@ export function Selectors(props: { defaultTreeish?: string; defaultInboxRefs?: s
         router.push(`${pathname}?${query}`);
       }}
     >
-      <div className="grid gap-1">
-        <label className="text-zinc-300">Treeish</label>
-        <input
-          className="rounded border border-zinc-800 bg-zinc-950 px-2 py-1 text-zinc-100"
-          value={treeish}
-          onChange={(e) => setTreeish(e.target.value)}
-          placeholder="HEAD"
-        />
-      </div>
       <div className="grid gap-1">
         <label className="text-zinc-300">Inbox refs (comma-separated)</label>
         <input

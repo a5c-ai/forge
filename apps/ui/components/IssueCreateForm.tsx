@@ -21,14 +21,12 @@ export function IssueCreateForm() {
         if (!title.trim()) return;
         setBusy(true);
         try {
-          const treeish = sp.get("treeish") ?? undefined;
           const inbox = sp.get("inbox") ?? undefined;
           const inboxRefs = inbox ? inbox.split(",").map((s) => s.trim()).filter(Boolean) : undefined;
           const res = await fetch(`/api/issues`, {
             method: "POST",
             headers: { "content-type": "application/json" },
             body: JSON.stringify({
-              treeish,
               inboxRefs,
               issueId: issueId.trim() || undefined,
               title: title.trim(),
@@ -38,7 +36,8 @@ export function IssueCreateForm() {
           const j = await res.json().catch(() => ({}));
           if (!res.ok) throw new Error(j?.error ?? `HTTP ${res.status}`);
           const id = String(j?.issueId ?? issueId.trim());
-          router.push(`/issues/${encodeURIComponent(id)}`);
+          const qs = inbox ? `?inbox=${encodeURIComponent(inbox)}` : "";
+          router.push(`/issues/${encodeURIComponent(id)}${qs}`);
           router.refresh();
         } catch (err2: any) {
           setErr(String(err2?.message ?? err2));

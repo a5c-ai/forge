@@ -7,14 +7,14 @@ import { IssueCreateForm } from "../../components/IssueCreateForm";
 
 export default async function IssuesPage(props: { searchParams?: Promise<Record<string, string | string[] | undefined>> }) {
   const sp = (await props.searchParams) ?? {};
-  const treeish = typeof sp.treeish === "string" ? sp.treeish : undefined;
   const inbox = typeof sp.inbox === "string" ? sp.inbox : undefined;
   const inboxRefs = inbox ? inbox.split(",").map((s) => s.trim()).filter(Boolean) : undefined;
   const defaultInbox = inbox ?? process.env.A5C_INBOX_REFS ?? "";
+  const qs = inbox ? `?inbox=${encodeURIComponent(inbox)}` : "";
   let issues: any[] = [];
   let loadError: string | null = null;
   try {
-    issues = (await getRenderedIssues({ treeish, inboxRefs } as any)) as any[];
+    issues = (await getRenderedIssues({ inboxRefs } as any)) as any[];
   } catch (e: any) {
     loadError = String(e?.message ?? e);
   }
@@ -22,12 +22,12 @@ export default async function IssuesPage(props: { searchParams?: Promise<Record<
     <main className="space-y-4">
       <div className="flex items-baseline justify-between">
         <h1 className="text-2xl font-semibold">Issues</h1>
-        <Link className="text-sm text-zinc-300 hover:text-white" href="/">
+        <Link className="text-sm text-zinc-300 hover:text-white" href={`/${qs}`}>
           Home
         </Link>
       </div>
       <RepoBanner />
-      <Selectors defaultTreeish={treeish} defaultInboxRefs={defaultInbox} />
+      <Selectors defaultInboxRefs={defaultInbox} />
       <IssueCreateForm />
 
       {loadError ? (
@@ -39,7 +39,7 @@ export default async function IssuesPage(props: { searchParams?: Promise<Record<
           <div className="p-4 text-sm text-zinc-300">No issues found.</div>
         ) : (
           issues.map((i: any) => (
-            <Link key={i.issueId} href={`/issues/${i.issueId}`} className="block p-4 hover:bg-zinc-800">
+            <Link key={i.issueId} href={`/issues/${i.issueId}${qs}`} className="block p-4 hover:bg-zinc-800">
               <div className="flex items-center justify-between gap-3">
                 <div className="font-medium">{i.title}</div>
                 <div className="text-xs text-zinc-400">{i.issueId}</div>

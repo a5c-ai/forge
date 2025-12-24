@@ -74,7 +74,7 @@ export function renderPR(snapshot: Snapshot, prKey: string): RenderedPR | undefi
   if (!root) return;
 
   const events: RenderedPR["events"] = [];
-  for (const ef of snapshot.collabEvents) {
+  for (const ef of all) {
     const e = ef.event;
     if (e.kind === "dep.changed") {
       const ent = (e as any).payload?.entity;

@@ -8,14 +8,14 @@ import { getRenderedPRs } from "../../lib/serverRepo";
 
 export default async function PRsPage(props: { searchParams?: Promise<Record<string, string | string[] | undefined>> }) {
   const sp = (await props.searchParams) ?? {};
-  const treeish = typeof sp.treeish === "string" ? sp.treeish : undefined;
   const inbox = typeof sp.inbox === "string" ? sp.inbox : undefined;
   const inboxRefs = inbox ? inbox.split(",").map((s) => s.trim()).filter(Boolean) : undefined;
   const defaultInbox = inbox ?? process.env.A5C_INBOX_REFS ?? "";
+  const qs = inbox ? `?inbox=${encodeURIComponent(inbox)}` : "";
   let prs: any[] = [];
   let loadError: string | null = null;
   try {
-    prs = (await getRenderedPRs({ treeish, inboxRefs })) as any[];
+    prs = (await getRenderedPRs({ inboxRefs })) as any[];
   } catch (e: any) {
     loadError = String(e?.message ?? e);
   }
@@ -23,12 +23,12 @@ export default async function PRsPage(props: { searchParams?: Promise<Record<str
     <main className="space-y-4">
       <div className="flex items-baseline justify-between">
         <h1 className="text-2xl font-semibold">PRs</h1>
-        <Link className="text-sm text-zinc-300 hover:text-white" href="/">
+        <Link className="text-sm text-zinc-300 hover:text-white" href={`/${qs}`}>
           Home
         </Link>
       </div>
       <RepoBanner />
-      <Selectors defaultTreeish={treeish} defaultInboxRefs={defaultInbox} />
+      <Selectors defaultInboxRefs={defaultInbox} />
       <div className="grid gap-4 lg:grid-cols-2">
         <PrRequestForm />
         <PrProposalForm />
@@ -42,7 +42,7 @@ export default async function PRsPage(props: { searchParams?: Promise<Record<str
           <div className="p-4 text-sm text-zinc-300">No PRs.</div>
         ) : (
           prs.map((p) => (
-            <Link key={p.prKey} href={`/prs/${p.prKey}`} className="block p-4 hover:bg-zinc-800">
+            <Link key={p.prKey} href={`/prs/${p.prKey}${qs}`} className="block p-4 hover:bg-zinc-800">
               <div className="flex items-center justify-between gap-3">
                 <div className="font-medium">{p.title}</div>
                 <div className="text-xs text-zinc-400">{p.prKey}</div>

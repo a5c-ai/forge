@@ -41,7 +41,8 @@ function commentEntityKey(ev: any): string | undefined {
 
 export function listIssues(snapshot: Snapshot): string[] {
   const ids = new Set<string>();
-  for (const ef of snapshot.collabEvents) {
+  const all = [...snapshot.collabEvents, ...(snapshot.inbox?.events ?? [])];
+  for (const ef of all) {
     const e = ef.event;
     if (isIssueEvent(e)) {
       const issueId = (e as any)?.payload?.issueId;
@@ -58,7 +59,8 @@ export function renderIssue(snapshot: Snapshot, issueId: string): RenderedIssue 
   let needsHuman: RenderedIssue["needsHuman"];
   const claims = new Map<string, { agentId: string; by: string; time: string; note?: string }>();
 
-  for (const ef of snapshot.collabEvents) {
+  const all = [...snapshot.collabEvents, ...(snapshot.inbox?.events ?? [])];
+  for (const ef of all) {
     const e = ef.event;
     if (isIssueEvent(e) && (e as any).payload.issueId === issueId) {
       // First create wins in this baseline (should be deterministic given ordering).

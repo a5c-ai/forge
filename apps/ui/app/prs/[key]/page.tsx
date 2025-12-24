@@ -11,13 +11,13 @@ export default async function PRPage(props: {
 }) {
   const { key } = await props.params;
   const sp = (await props.searchParams) ?? {};
-  const treeish = typeof sp.treeish === "string" ? sp.treeish : undefined;
   const inbox = typeof sp.inbox === "string" ? sp.inbox : undefined;
   const inboxRefs = inbox ? inbox.split(",").map((s) => s.trim()).filter(Boolean) : undefined;
+  const qs = inbox ? `?inbox=${encodeURIComponent(inbox)}` : "";
   let pr: any = null;
   let loadError: string | null = null;
   try {
-    pr = await getRenderedPR(key, { treeish, inboxRefs });
+    pr = await getRenderedPR(key, { inboxRefs });
   } catch (e: any) {
     loadError = String(e?.message ?? e);
   }
@@ -27,12 +27,12 @@ export default async function PRPage(props: {
       <main className="space-y-4">
         <div className="flex items-baseline justify-between">
           <h1 className="text-2xl font-semibold">PR</h1>
-          <Link className="text-sm text-zinc-300 hover:text-white" href="/prs">
+          <Link className="text-sm text-zinc-300 hover:text-white" href={`/prs${qs}`}>
             Back
           </Link>
         </div>
         <RepoBanner />
-        <Selectors defaultTreeish={treeish} defaultInboxRefs={inbox} />
+        <Selectors defaultInboxRefs={inbox} />
         <UiErrorPanel title="Unable to load PR" message={`The UI could not load PR '${key}'.`} details={loadError} />
       </main>
     );
@@ -43,7 +43,7 @@ export default async function PRPage(props: {
       <main className="space-y-4">
         <div className="flex items-baseline justify-between">
           <h1 className="text-2xl font-semibold">PR not found</h1>
-          <Link className="text-sm text-zinc-300 hover:text-white" href="/prs">
+          <Link className="text-sm text-zinc-300 hover:text-white" href={`/prs${qs}`}>
             Back
           </Link>
         </div>
@@ -57,12 +57,12 @@ export default async function PRPage(props: {
     <main className="space-y-4">
       <div className="flex items-baseline justify-between">
         <h1 className="text-2xl font-semibold">{pr.title}</h1>
-        <Link className="text-sm text-zinc-300 hover:text-white" href="/prs">
+        <Link className="text-sm text-zinc-300 hover:text-white" href={`/prs${qs}`}>
           Back
         </Link>
       </div>
       <RepoBanner />
-      <Selectors defaultTreeish={treeish} defaultInboxRefs={inbox} />
+      <Selectors defaultInboxRefs={inbox} />
 
       <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
         <div className="text-xs text-zinc-400">
@@ -128,5 +128,4 @@ export default async function PRPage(props: {
     </main>
   );
 }
-
 
