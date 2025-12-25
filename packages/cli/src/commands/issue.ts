@@ -1,5 +1,6 @@
 import type { CommandArgs } from "./types.js";
 import { git, gitConfigGet } from "../git.js";
+import { syncAfterWrite, syncBeforeWrite } from "../sync.js";
 import {
   HlcClock,
   UlidGenerator,
@@ -48,6 +49,9 @@ export async function handleIssue(args: CommandArgs): Promise<number | undefined
       args.io.writeLine(args.io.err, "missing --title");
       return 2;
     }
+    if (args.flags.sync && args.flags.commit) {
+      await syncBeforeWrite({ repoRoot: args.repoRoot, inboxRefs: args.flags.inboxRefs });
+    }
     const actor = process.env.A5C_ACTOR ?? (await gitConfigGet(args.repoRoot, "user.name")) ?? "unknown";
     const issueId = args.flags.id ?? `issue-${new UlidGenerator().generate()}`;
     const time = new Date(args.nowMs()).toISOString();
@@ -61,6 +65,7 @@ export async function handleIssue(args: CommandArgs): Promise<number | undefined
     if (args.flags.commit) {
       const msg = args.flags.message ?? `a5c: issue new ${issueId}`;
       await git(["-c", "user.name=a5c", "-c", "user.email=a5c@example.invalid", "commit", "-m", msg], args.repoRoot);
+      if (args.flags.sync) await syncAfterWrite({ repoRoot: args.repoRoot });
     }
     args.io.writeLine(args.io.out, issueId);
     return 0;
@@ -72,6 +77,9 @@ export async function handleIssue(args: CommandArgs): Promise<number | undefined
     if (!id || !body) {
       args.io.writeLine(args.io.err, "usage: git a5c issue comment <id> -m <text>");
       return 2;
+    }
+    if (args.flags.sync && args.flags.commit) {
+      await syncBeforeWrite({ repoRoot: args.repoRoot, inboxRefs: args.flags.inboxRefs });
     }
     const actor = process.env.A5C_ACTOR ?? (await gitConfigGet(args.repoRoot, "user.name")) ?? "unknown";
     const commentId = args.flags.commentId ?? `c-${new UlidGenerator().generate()}`;
@@ -86,6 +94,7 @@ export async function handleIssue(args: CommandArgs): Promise<number | undefined
     if (args.flags.commit) {
       const msg = args.flags.message ?? `a5c: issue comment ${id}`;
       await git(["-c", "user.name=a5c", "-c", "user.email=a5c@example.invalid", "commit", "-m", msg], args.repoRoot);
+      if (args.flags.sync) await syncAfterWrite({ repoRoot: args.repoRoot });
     }
     args.io.writeLine(args.io.out, commentId);
     return 0;
@@ -99,6 +108,9 @@ export async function handleIssue(args: CommandArgs): Promise<number | undefined
       args.io.writeLine(args.io.err, "usage: git a5c issue edit-comment <commentId> --id <issueId> -m <text>");
       return 2;
     }
+    if (args.flags.sync && args.flags.commit) {
+      await syncBeforeWrite({ repoRoot: args.repoRoot, inboxRefs: args.flags.inboxRefs });
+    }
     const actor = process.env.A5C_ACTOR ?? (await gitConfigGet(args.repoRoot, "user.name")) ?? "unknown";
     const time = new Date(args.nowMs()).toISOString();
     const persisted = (await loadHlcState(actor)) ?? { wallMs: 0, counter: 0 };
@@ -111,6 +123,7 @@ export async function handleIssue(args: CommandArgs): Promise<number | undefined
     if (args.flags.commit) {
       const msg = args.flags.message ?? `a5c: issue edit-comment ${id} ${commentId}`;
       await git(["-c", "user.name=a5c", "-c", "user.email=a5c@example.invalid", "commit", "-m", msg], args.repoRoot);
+      if (args.flags.sync) await syncAfterWrite({ repoRoot: args.repoRoot });
     }
     args.io.writeLine(args.io.out, res.path);
     return 0;
@@ -122,6 +135,9 @@ export async function handleIssue(args: CommandArgs): Promise<number | undefined
     if (!commentId || !id) {
       args.io.writeLine(args.io.err, "usage: git a5c issue redact-comment <commentId> --id <issueId> [--reason ...]");
       return 2;
+    }
+    if (args.flags.sync && args.flags.commit) {
+      await syncBeforeWrite({ repoRoot: args.repoRoot, inboxRefs: args.flags.inboxRefs });
     }
     const actor = process.env.A5C_ACTOR ?? (await gitConfigGet(args.repoRoot, "user.name")) ?? "unknown";
     const time = new Date(args.nowMs()).toISOString();
@@ -135,6 +151,7 @@ export async function handleIssue(args: CommandArgs): Promise<number | undefined
     if (args.flags.commit) {
       const msg = args.flags.message ?? `a5c: issue redact-comment ${id} ${commentId}`;
       await git(["-c", "user.name=a5c", "-c", "user.email=a5c@example.invalid", "commit", "-m", msg], args.repoRoot);
+      if (args.flags.sync) await syncAfterWrite({ repoRoot: args.repoRoot });
     }
     args.io.writeLine(args.io.out, res.path);
     return 0;

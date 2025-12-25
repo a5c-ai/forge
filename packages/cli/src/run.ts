@@ -16,6 +16,7 @@ import { handleVerify } from "./commands/verify.js";
 import { handleJournal } from "./commands/journal.js";
 import { handleServer } from "./commands/server.js";
 import { handleUi } from "./commands/ui.js";
+import { autoPullForRead } from "./sync.js";
 
 export type RunOptions = {
   cwd?: string;
@@ -37,6 +38,16 @@ function nowMs(): number {
   return Date.now();
 }
 
+function isReadCommand(positionals: string[]): boolean {
+  const cmd = positionals[0] ?? "help";
+  const sub = positionals[1];
+  if (cmd === "status" || cmd === "journal" || cmd === "verify") return true;
+  if (cmd === "issue" && (sub === "list" || sub === "show")) return true;
+  if (cmd === "pr" && (sub === "list" || sub === "show")) return true;
+  if (cmd === "webhook" && sub === "status") return true;
+  return false;
+}
+
 export async function runCli(argv: string[], opts: RunOptions = {}): Promise<number> {
   const cwd = opts.cwd ?? process.cwd();
   const out = opts.stdout ?? ((s) => process.stdout.write(s));
@@ -56,6 +67,11 @@ export async function runCli(argv: string[], opts: RunOptions = {}): Promise<num
   const treeish = typeof flags.treeish === "string" ? flags.treeish : "HEAD";
 
   log.debug("start", { cmd, treeish, repoRoot });
+
+  if (isReadCommand(positionals)) {
+    await autoPullForRead({ repoRoot, inboxRefs: flags.inboxRefs, warn: (s) => writeLine(err, s) });
+  }
+
   const repo = await openRepo(repoRoot);
   const snap = await loadSnapshot({ git: repo.git, treeish, inboxRefs: flags.inboxRefs });
 

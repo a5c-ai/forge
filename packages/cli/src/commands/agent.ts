@@ -1,5 +1,6 @@
 import type { CommandArgs } from "./types.js";
 import { git, gitConfigGet } from "../git.js";
+import { syncAfterWrite, syncBeforeWrite } from "../sync.js";
 import {
   HlcClock,
   UlidGenerator,
@@ -26,12 +27,16 @@ export async function handleAgent(args: CommandArgs): Promise<number | undefined
     const status = args.flags.message ?? undefined;
     const entityId = args.flags.entity;
     const entity = entityId ? ({ type: entityId.startsWith("pr-") ? "pr" : "issue", id: entityId } as const) : undefined;
+    if (args.flags.sync && args.flags.commit) {
+      await syncBeforeWrite({ repoRoot: args.repoRoot, inboxRefs: args.flags.inboxRefs });
+    }
     const res = await writeAgentHeartbeat(ctx, { agentId, ttlSeconds, status, entity, time });
     await saveHlcState(actor, clock.now());
     if (args.flags.stageOnly || args.flags.commit) await stageFiles(args.repoRoot, [res.path]);
     if (args.flags.commit) {
       const msg = args.flags.message ?? `a5c: agent heartbeat ${agentId}`;
       await git(["-c", "user.name=a5c", "-c", "user.email=a5c@example.invalid", "commit", "-m", msg], args.repoRoot);
+      if (args.flags.sync) await syncAfterWrite({ repoRoot: args.repoRoot });
     }
     args.io.writeLine(args.io.out, res.path);
     return 0;
@@ -42,6 +47,9 @@ export async function handleAgent(args: CommandArgs): Promise<number | undefined
     if (!entityId) {
       args.io.writeLine(args.io.err, "usage: git a5c agent dispatch --entity <issueId|prKey> [--dispatch-id ...] [--task ...]");
       return 2;
+    }
+    if (args.flags.sync && args.flags.commit) {
+      await syncBeforeWrite({ repoRoot: args.repoRoot, inboxRefs: args.flags.inboxRefs });
     }
     const dispatchId = args.flags.dispatchId ?? `d-${new UlidGenerator().generate()}`;
     const time = new Date(args.nowMs()).toISOString();
@@ -60,6 +68,7 @@ export async function handleAgent(args: CommandArgs): Promise<number | undefined
     if (args.flags.commit) {
       const msg = args.flags.message ?? `a5c: agent dispatch ${dispatchId}`;
       await git(["-c", "user.name=a5c", "-c", "user.email=a5c@example.invalid", "commit", "-m", msg], args.repoRoot);
+      if (args.flags.sync) await syncAfterWrite({ repoRoot: args.repoRoot });
     }
     args.io.writeLine(args.io.out, res.path);
     return 0;

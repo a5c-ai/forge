@@ -1,5 +1,6 @@
 import type { CommandArgs } from "./types.js";
 import { git, gitConfigGet } from "../git.js";
+import { syncAfterWrite, syncBeforeWrite } from "../sync.js";
 import {
   HlcClock,
   UlidGenerator,
@@ -50,6 +51,9 @@ export async function handlePr(args: CommandArgs): Promise<number | undefined> {
       args.io.writeLine(args.io.err, "missing --base, --head, or --title");
       return 2;
     }
+    if (args.flags.sync && args.flags.commit) {
+      await syncBeforeWrite({ repoRoot: args.repoRoot, inboxRefs: args.flags.inboxRefs });
+    }
     const actor = process.env.A5C_ACTOR ?? (await gitConfigGet(args.repoRoot, "user.name")) ?? "unknown";
     const prKey = args.flags.id ?? `pr-${new UlidGenerator().generate()}`;
     const time = new Date(args.nowMs()).toISOString();
@@ -63,6 +67,7 @@ export async function handlePr(args: CommandArgs): Promise<number | undefined> {
     if (args.flags.commit) {
       const msg = args.flags.message ?? `a5c: pr propose ${prKey}`;
       await git(["-c", "user.name=a5c", "-c", "user.email=a5c@example.invalid", "commit", "-m", msg], args.repoRoot);
+      if (args.flags.sync) await syncAfterWrite({ repoRoot: args.repoRoot });
     }
     args.io.writeLine(args.io.out, prKey);
     return 0;
@@ -74,6 +79,9 @@ export async function handlePr(args: CommandArgs): Promise<number | undefined> {
     if (!baseRef || !title) {
       args.io.writeLine(args.io.err, "missing --base or --title");
       return 2;
+    }
+    if (args.flags.sync && args.flags.commit) {
+      await syncBeforeWrite({ repoRoot: args.repoRoot, inboxRefs: args.flags.inboxRefs });
     }
     const actor = process.env.A5C_ACTOR ?? (await gitConfigGet(args.repoRoot, "user.name")) ?? "unknown";
     const prKey = args.flags.id ?? `pr-${new UlidGenerator().generate()}`;
@@ -88,6 +96,7 @@ export async function handlePr(args: CommandArgs): Promise<number | undefined> {
     if (args.flags.commit) {
       const msg = args.flags.message ?? `a5c: pr request ${prKey}`;
       await git(["-c", "user.name=a5c", "-c", "user.email=a5c@example.invalid", "commit", "-m", msg], args.repoRoot);
+      if (args.flags.sync) await syncAfterWrite({ repoRoot: args.repoRoot });
     }
     args.io.writeLine(args.io.out, prKey);
     return 0;
@@ -99,6 +108,9 @@ export async function handlePr(args: CommandArgs): Promise<number | undefined> {
     if (!prKey || !headRef) {
       args.io.writeLine(args.io.err, "missing prKey or --head-ref");
       return 2;
+    }
+    if (args.flags.sync && args.flags.commit) {
+      await syncBeforeWrite({ repoRoot: args.repoRoot, inboxRefs: args.flags.inboxRefs });
     }
     const actor = process.env.A5C_ACTOR ?? (await gitConfigGet(args.repoRoot, "user.name")) ?? "unknown";
     const time = new Date(args.nowMs()).toISOString();
@@ -112,6 +124,7 @@ export async function handlePr(args: CommandArgs): Promise<number | undefined> {
     if (args.flags.commit) {
       const msg = args.flags.message ?? `a5c: pr claim ${prKey}`;
       await git(["-c", "user.name=a5c", "-c", "user.email=a5c@example.invalid", "commit", "-m", msg], args.repoRoot);
+      if (args.flags.sync) await syncAfterWrite({ repoRoot: args.repoRoot });
     }
     args.io.writeLine(args.io.out, res.path);
     return 0;
@@ -123,6 +136,9 @@ export async function handlePr(args: CommandArgs): Promise<number | undefined> {
     if (!prKey || !headRef) {
       args.io.writeLine(args.io.err, "missing prKey or --head-ref");
       return 2;
+    }
+    if (args.flags.sync && args.flags.commit) {
+      await syncBeforeWrite({ repoRoot: args.repoRoot, inboxRefs: args.flags.inboxRefs });
     }
     const actor = process.env.A5C_ACTOR ?? (await gitConfigGet(args.repoRoot, "user.name")) ?? "unknown";
     const time = new Date(args.nowMs()).toISOString();
@@ -136,6 +152,7 @@ export async function handlePr(args: CommandArgs): Promise<number | undefined> {
     if (args.flags.commit) {
       const msg = args.flags.message ?? `a5c: pr bind-head ${prKey}`;
       await git(["-c", "user.name=a5c", "-c", "user.email=a5c@example.invalid", "commit", "-m", msg], args.repoRoot);
+      if (args.flags.sync) await syncAfterWrite({ repoRoot: args.repoRoot });
     }
     args.io.writeLine(args.io.out, res.path);
     return 0;

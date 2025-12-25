@@ -7,6 +7,8 @@ export function handleHelp(args: CommandArgs): number | undefined {
   const { writeLine } = args.io;
   const out = args.io.out;
   writeLine(out, "git a5c <command> [--json] [--treeish <ref>] [--repo <path>] [--inbox-ref <ref>...]");
+  writeLine(out, "  Read commands auto-pull from origin when safe (ff-only, clean tree).");
+  writeLine(out, "  Write commands can use --sync with --commit to pull before and push after.");
   writeLine(out, "");
   writeLine(out, "Commands:");
   writeLine(out, "  status");

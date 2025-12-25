@@ -1,5 +1,6 @@
 import type { CommandArgs } from "./types.js";
 import { git, gitConfigGet } from "../git.js";
+import { syncAfterWrite, syncBeforeWrite } from "../sync.js";
 import { HlcClock, loadHlcState, saveHlcState, stageFiles, writeGateChanged } from "@a5c-ai/sdk";
 
 export async function handleGate(args: CommandArgs): Promise<number | undefined> {
@@ -12,6 +13,9 @@ export async function handleGate(args: CommandArgs): Promise<number | undefined>
   }
   const entity = { type: entityId.startsWith("pr-") ? "pr" : "issue", id: entityId } as const;
   const needsHuman = sub === "needs-human";
+  if (args.flags.sync && args.flags.commit) {
+    await syncBeforeWrite({ repoRoot: args.repoRoot, inboxRefs: args.flags.inboxRefs });
+  }
   const actor = process.env.A5C_ACTOR ?? (await gitConfigGet(args.repoRoot, "user.name")) ?? "unknown";
   const time = new Date(args.nowMs()).toISOString();
   const persisted = (await loadHlcState(actor)) ?? { wallMs: 0, counter: 0 };
@@ -24,6 +28,7 @@ export async function handleGate(args: CommandArgs): Promise<number | undefined>
   if (args.flags.commit) {
     const msg = args.flags.message ?? `a5c: gate ${sub} ${entityId}`;
     await git(["-c", "user.name=a5c", "-c", "user.email=a5c@example.invalid", "commit", "-m", msg], args.repoRoot);
+    if (args.flags.sync) await syncAfterWrite({ repoRoot: args.repoRoot });
   }
   args.io.writeLine(args.io.out, res.path);
   return 0;

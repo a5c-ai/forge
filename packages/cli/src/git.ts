@@ -35,4 +35,53 @@ export async function gitPath(cwd: string, name: string): Promise<string> {
   return out.trim();
 }
 
+export async function gitHasOrigin(cwd: string): Promise<boolean> {
+  try {
+    const out = await git(["remote", "get-url", "origin"], cwd);
+    return out.trim().length > 0;
+  } catch {
+    return false;
+  }
+}
+
+export async function gitCurrentBranch(cwd: string): Promise<string | undefined> {
+  try {
+    const out = await git(["symbolic-ref", "--quiet", "--short", "HEAD"], cwd);
+    const v = out.trim();
+    return v.length ? v : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export async function gitHasUpstream(cwd: string): Promise<boolean> {
+  try {
+    const out = await git(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"], cwd);
+    return out.trim().length > 0;
+  } catch {
+    return false;
+  }
+}
+
+export async function gitIsClean(cwd: string): Promise<boolean> {
+  try {
+    const out = await git(["status", "--porcelain"], cwd);
+    return out.trim().length === 0;
+  } catch {
+    return false;
+  }
+}
+
+export async function gitPullFFOnly(cwd: string): Promise<void> {
+  await git(["pull", "--ff-only"], cwd);
+}
+
+export async function gitPush(cwd: string): Promise<void> {
+  await git(["push"], cwd);
+}
+
+export async function gitFetchRef(cwd: string, remote: string, ref: string): Promise<void> {
+  await git(["fetch", remote, `${ref}:${ref}`], cwd);
+}
+
 

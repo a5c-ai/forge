@@ -4,6 +4,7 @@ export type ParsedArgs = {
     treeish?: string;
     json?: boolean;
     inboxRefs?: string[];
+    sync?: boolean;
     port?: number;
     token?: string;
     since?: string;
@@ -48,6 +49,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
     if (a === "--repo") flags.repo = args.shift()!;
     else if (a === "--treeish") flags.treeish = args.shift()!;
     else if (a === "--json") flags.json = true;
+    else if (a === "--sync") flags.sync = true;
     else if (a === "--port" || a === "-p") flags.port = Number(args.shift()!);
     else if (a === "--token") flags.token = args.shift()!;
     else if (a === "--inbox-ref") {
