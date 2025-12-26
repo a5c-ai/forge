@@ -25,7 +25,6 @@ describe("CLI git sync", () => {
     await run("git", ["--git-dir", bare, "symbolic-ref", "HEAD", "refs/heads/main"], tmp);
 
     await run("git", ["clone", "-q", bare, workB], tmp);
-    await run("git", ["-C", workB, "checkout", "-q", "-b", "main", "--track", "origin/main"], tmp);
 
     const evPath = path.join(workB, ".collab", "issues", "issue-3", "events", "2025", "12", "1734629400000_test_0001.issue.event.created.json");
     await writeJson(evPath, {
