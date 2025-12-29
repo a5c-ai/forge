@@ -1,0 +1,15 @@
+{
+  "schema": "a5cforge/v1",
+  "kind": "run.dispatched",
+  "id": "evt_run_001_0001",
+  "time": "2025-12-26T00:00:00.000Z",
+  "actor": "tester",
+  "payload": {
+    "run_id": "run_001",
+    "playbook": {
+      "path": "playbooks/reward_redo.yaml",
+      "version": "v1"
+    }
+  }
+}
+

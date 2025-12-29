@@ -35,6 +35,25 @@ export type ParsedArgs = {
     dispatchId?: string;
     url?: string;
     type?: string;
+    plan?: string;
+    playbook?: string;
+    overridesFile?: string;
+    runId?: string;
+    max?: number;
+    maxTransitions?: number;
+    dryRun?: boolean;
+    in?: string;
+    out?: string;
+    stdout?: string;
+    stderr?: string;
+    profile?: string;
+    model?: string;
+    mcps?: string;
+    config?: string;
+    template?: string;
+    vars?: Record<string, string>;
+    pretty?: boolean;
+    maxIterations?: number;
   };
   positionals: string[];
 };
@@ -84,6 +103,32 @@ export function parseArgs(argv: string[]): ParsedArgs {
     else if (a === "--dispatch-id") flags.dispatchId = args.shift()!;
     else if (a === "--url") flags.url = args.shift()!;
     else if (a === "--type") flags.type = args.shift()!;
+    else if (a === "--plan") flags.plan = args.shift()!;
+    else if (a === "--playbook") flags.playbook = args.shift()!;
+    else if (a === "--overrides-file") flags.overridesFile = args.shift()!;
+    else if (a === "--run-id") flags.runId = args.shift()!;
+    else if (a === "--max") flags.max = Number(args.shift()!);
+    else if (a === "--max-transitions") flags.maxTransitions = Number(args.shift()!);
+    else if (a === "--max-iterations") flags.maxIterations = Number(args.shift()!);
+    else if (a === "--dry-run") flags.dryRun = true;
+    else if (a === "--in") flags.in = args.shift()!;
+    else if (a === "--out") flags.out = args.shift()!;
+    else if (a === "--stdout") flags.stdout = args.shift()!;
+    else if (a === "--stderr") flags.stderr = args.shift()!;
+    else if (a === "--profile") flags.profile = args.shift()!;
+    else if (a === "--model") flags.model = args.shift()!;
+    else if (a === "--mcps") flags.mcps = args.shift()!;
+    else if (a === "--config") flags.config = args.shift()!;
+    else if (a === "--pretty") flags.pretty = true;
+    else if (a === "--template") flags.template = args.shift()!;
+    else if (a === "--var") {
+      const v = args.shift()!;
+      const idx = v.indexOf("=");
+      const k = idx >= 0 ? v.slice(0, idx) : v;
+      const val = idx >= 0 ? v.slice(idx + 1) : "true";
+      flags.vars ??= {};
+      if (k) flags.vars[k] = val;
+    }
     else positionals.push(a);
   }
 

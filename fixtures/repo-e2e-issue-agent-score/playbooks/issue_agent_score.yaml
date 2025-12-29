@@ -1,0 +1,60 @@
+template_id: issue_agent_score
+version: v1
+name: Issue → Agent → Evidence Score
+description: End-to-end fixture combining issue context, agent context generation, agent run, and evidence-based scoring.
+
+steps:
+  - step_id: 1
+    name: Agent
+    type: agent
+    agent:
+      profile: default
+    instructions: |
+      Work on issue `issue_100`.
+
+      - Use the issue events (included in the prompt template) as context.
+      - Produce a short plan.
+    breakpoint:
+      enabled: false
+
+  - step_id: 2
+    name: Reward
+    type: reward
+    instructions: |
+      Compute reward from evidence producers.
+    reward:
+      signals: [unit, visual]
+      policy:
+        on_fail: pause
+      thresholds:
+        pass: 0.8
+    breakpoint:
+      enabled: false
+
+signals:
+  unit:
+    severity: HARD
+    weight: 0.5
+    producer: unit_prod
+    producer_args:
+      cmd: "pnpm test"
+    scoring:
+      mode: pass_fail
+  visual:
+    severity: SOFT
+    weight: 0.5
+    producer: visual_prod
+    producer_args:
+      cmd: "pnpm test:visual"
+    scoring:
+      mode: diff_ratio
+      pass_if_lte: 0.02
+
+evidence_producers:
+  unit_prod:
+    kind: command
+    default_outputs: [unit_report]
+  visual_prod:
+    kind: command
+    default_outputs: [visual_report]
+

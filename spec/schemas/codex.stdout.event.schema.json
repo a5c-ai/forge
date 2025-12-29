@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a5cforge.dev/schemas/a5cforge-v1/codex.stdout.event.schema.json",
+  "title": "a5cforge/v1 - Codex stdout parsed event (parse --type codex)",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["type", "timestamp", "raw"],
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "user_instructions_event",
+        "tokens_used",
+        "thinking",
+        "turn_diff",
+        "codex",
+        "exec",
+        "exec_result",
+        "banner"
+      ]
+    },
+    "timestamp": { "type": "string", "minLength": 1 },
+    "raw": { "type": "string" },
+    "fields": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "tokens": { "type": "number" },
+        "thought": { "type": "string" },
+        "diff": { "type": "string" },
+        "explanation": { "type": "string" },
+        "command": { "type": "string" },
+        "cwd": { "type": "string" },
+        "status": { "type": "string" },
+        "durationMs": { "type": "number" },
+        "exitCode": { "type": "number" },
+        "result": { "type": "string" },
+        "version": { "type": "string" }
+      }
+    }
+  }
+}
+

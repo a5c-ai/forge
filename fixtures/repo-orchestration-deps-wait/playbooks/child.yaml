@@ -1,0 +1,9 @@
+template_id: deps_child
+version: v1
+name: Deps Child
+description: Dependent playbook that completes immediately.
+steps:
+  - step_id: 1
+    name: Child step
+    type: agent
+    instructions: "noop"

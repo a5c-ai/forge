@@ -69,8 +69,15 @@ git a5c block <entityId> --by <issue|pr> [--op add|remove] [-m <note>] [--stage-
 git a5c agent heartbeat [--agent-id <id>] [--ttl-seconds N] [--entity <id>] [-m <status>] [--stage-only|--commit]
 git a5c agent dispatch --entity <id> --agent-id <id> --task <task> [--dispatch-id <id>] [--stage-only|--commit]
 
+git a5c agent generate-context [--in <path>] [--template <uri>] [--var k=v]... [--out <path>] [--token <t>]
+git a5c agent run [--profile <name>] [--in <path>] [--out <path>] [--stdout <path>] [--stderr <path>] [--model <m>] [--mcps <path>] [--config <uri>]
+
 git a5c ops deploy --entity <id> [--artifact <uri>] [-m <status>] [--stage-only|--commit]
 ```
+
+See also:
+
+- `docs/cli/agent-generate-context.md`
 
 ## journal
 
@@ -96,3 +103,31 @@ git a5c hooks uninstall
 git a5c webhook status [--json]
 git a5c webhook test --url <url> [--type <type>] [--json]
 ```
+
+## parse
+
+```bash
+git a5c parse --type codex [--out <path>] [--pretty]
+```
+
+See also:
+
+- `docs/cli/parse.md`
+
+## orchestration
+
+```bash
+git a5c run dispatch --playbook <path>@<version> [--run-id <id>] [--overrides-file <path>]
+git a5c run playbook --playbook <path>@<version> [--run-id <id>] [--overrides-file <path>] [--max-iterations N] [--json]
+git a5c run reconcile --run-id <id> [--max-transitions N] [--json] [--dry-run]
+git a5c run tick --run-id <id> [--max-transitions N] [--dry-run]
+git a5c hook exec --plan <path|->
+git a5c run sweep [--max N]
+git a5c run resume --run-id <id> [-m <msg>]
+git a5c run complete-step --run-id <id> [-m <msg>]
+```
+
+See also:
+
+- `docs/orchestration/README.md`
+- `docs/orchestration/end-to-end.md`

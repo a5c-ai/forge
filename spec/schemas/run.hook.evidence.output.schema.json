@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a5cforge.dev/schemas/a5cforge-v1/run.hook.evidence.output.schema.json",
+  "title": "a5cforge/v1 - evidence producer hook output",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["ok"],
+  "properties": {
+    "ok": { "type": "boolean" },
+    "error": { "type": "string" },
+    "evidence": { "type": "array", "items": { "$ref": "./evidence.object.schema.json" } }
+  }
+}
+

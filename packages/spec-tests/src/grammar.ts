@@ -18,7 +18,11 @@ export function assertEventFilenameGrammar(filePath: string) {
   // Minimal Phase-1 grammar: filename begins with a numeric ms timestamp and contains kind suffix.
   // Example: `1734628200000_alice_0001.issue.event.created.json`
   const base = path.basename(filePath);
-  const ok = /^\d{13}_[A-Za-z0-9._-]+_\d{4}\.[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)*\.(json|md|ndjson)$/.test(base);
+  const okOld = /^\d{13}_[A-Za-z0-9._-]+_\d{4}\.[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)*\.(json|md|ndjson)$/.test(base);
+  // Orchestration runner grammar (seq-based):
+  //   000001__run.step.started__s3__a1__runner.json
+  const okRun = /^\d+__[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)*__s\d+__a\d+__[A-Za-z0-9._-]+\.(json|md|ndjson)$/.test(base);
+  const ok = okOld || okRun;
   if (!ok) throw new Error(`Bad event filename grammar: ${base}`);
 }
 
@@ -34,7 +38,8 @@ export function assertEventPathGrammar(filePath: string) {
     /\/\.collab\/issues\/[^/]+\/events\/\d{4}\/\d{2}\/[^/]+\.(json|md|ndjson)$/,
     /\/\.collab\/prs\/[^/]+\/events\/\d{4}\/\d{2}\/[^/]+\.(json|md|ndjson)$/,
     /\/\.collab\/agents\/events\/\d{4}\/\d{2}\/[^/]+\.(json|md|ndjson)$/,
-    /\/\.collab\/ops\/events\/\d{4}\/\d{2}\/[^/]+\.(json|md|ndjson)$/
+    /\/\.collab\/ops\/events\/\d{4}\/\d{2}\/[^/]+\.(json|md|ndjson)$/,
+    /\/\.collab\/runs\/[^/]+\/events\/[^/]+\.(json|md|ndjson)$/
   ];
   const ok = patterns.some((re) => re.test(normalized));
   if (!ok) throw new Error(`Bad event path grammar: ${normalized}`);

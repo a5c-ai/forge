@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a5cforge.dev/schemas/a5cforge-v1/run.dispatched.schema.json",
+  "title": "a5cforge/v1 - run.dispatched",
+  "allOf": [
+    { "$ref": "./event.base.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "run.dispatched" },
+        "payload": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["run_id", "playbook"],
+          "properties": {
+            "run_id": { "type": "string", "minLength": 1 },
+            "playbook": {
+              "type": "object",
+              "additionalProperties": true,
+              "required": ["path", "version"],
+              "properties": {
+                "path": { "type": "string", "minLength": 1 },
+                "version": { "type": "string", "minLength": 1 }
+              }
+            },
+            "template_patch": { "type": "object" }
+          }
+        }
+      }
+    }
+  ]
+}
+

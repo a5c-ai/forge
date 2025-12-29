@@ -1,0 +1,17 @@
+template_id: cbp_resume
+version: v1
+name: CBP Resume
+description: CBP pauses step1
+steps:
+  - step_id: 1
+    name: Step 1
+    type: agent
+    instructions: noop
+    breakpoint:
+      enabled: false
+cbp:
+  - id: pause_always
+    scope: step
+    step_id: 1
+    when: "true"
+    message: paused

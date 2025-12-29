@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a5cforge.dev/schemas/a5cforge-v1/agent.predefined.schema.json",
+  "title": "a5cforge/v1 - predefined agent CLI config",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["cli", "profiles"],
+  "properties": {
+    "cli": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "cli_command": { "type": "string" },
+          "description": { "type": "string" },
+          "install": { "type": "string" },
+          "stdin_enabled": { "type": "boolean" },
+          "envs": { "type": "object", "additionalProperties": { "type": "string" } }
+        }
+      }
+    },
+    "profiles": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["cli"],
+        "properties": {
+          "default": { "type": "boolean" },
+          "cli": { "type": "string", "minLength": 1 },
+          "model": { "type": "string" },
+          "description": { "type": "string" },
+          "cli_params": { "type": "string" }
+        }
+      }
+    }
+  }
+}
+

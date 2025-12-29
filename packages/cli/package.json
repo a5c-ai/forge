@@ -10,16 +10,21 @@
   },
   "scripts": {
     "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.json",
-    "test": "vitest run",
+    "test": "pnpm -C ../sdk build && pnpm build && vitest run",
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
     "@a5c-ai/sdk": "workspace:*",
     "@a5c-ai/server": "workspace:*",
-    "@a5c-ai/ui": "workspace:*"
+    "@a5c-ai/ui": "workspace:*",
+    "minimatch": "^10.0.1",
+    "yaml": "^2.6.1"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^2.1.8",
+    "js-yaml": "^4.1.0",
     "typescript": "^5.7.3",
     "vitest": "^2.1.8"
   },

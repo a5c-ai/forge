@@ -1,0 +1,13 @@
+{
+  "schema": "a5cforge/v1",
+  "kind": "run.step.started",
+  "id": "evt_run_001_0002",
+  "time": "2025-12-26T00:00:01.000Z",
+  "actor": "tester",
+  "payload": {
+    "run_id": "run_001",
+    "step_id": 1,
+    "attempt": 1
+  }
+}
+

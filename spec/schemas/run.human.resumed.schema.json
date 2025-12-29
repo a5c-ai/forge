@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a5cforge.dev/schemas/a5cforge-v1/run.human.resumed.schema.json",
+  "title": "a5cforge/v1 - run.human.resumed",
+  "allOf": [
+    { "$ref": "./event.base.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "run.human.resumed" },
+        "payload": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["run_id", "step_id", "attempt"],
+          "properties": {
+            "run_id": { "type": "string", "minLength": 1 },
+            "step_id": { "type": "integer", "minimum": 0 },
+            "attempt": { "type": "integer", "minimum": 0 },
+            "message": { "type": "string" }
+          }
+        }
+      }
+    }
+  ]
+}

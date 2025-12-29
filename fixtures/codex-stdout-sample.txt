@@ -1,0 +1,14 @@
+[2025-09-19T11:58:08] OpenAI Codex v1.2.3
+---------------------
+Model: gpt-4.1
+Mode: agent
+---------------------
+[2025-09-19T11:58:09] User instructions:
+Do the thing.
+[2025-09-19T11:58:10] thinking
+I should think.
+[2025-09-19T11:58:11] exec echo hi in C:\\tmp
+[2025-09-19T11:58:12] echo hi succeeded in 12ms:
+hi
+[2025-09-19T11:58:13] tokens used: 123
+

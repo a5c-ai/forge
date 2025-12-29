@@ -28,13 +28,24 @@ export function handleHelp(args: CommandArgs): number | undefined {
   writeLine(out, "  gate needs-human <entityId> [--topic <t>] [-m <msg>] [--stage-only|--commit]");
   writeLine(out, "  gate clear <entityId> [-m <msg>] [--stage-only|--commit]");
   writeLine(out, "  agent heartbeat [--agent-id <id>] [--ttl-seconds N] [--entity <id>] [-m <status>] [--stage-only|--commit]");
+  writeLine(out, "  agent run [--profile <name>] [--in <path|->] [--out <path>] [--stdout <path>] [--stderr <path>] [--model <m>] [--mcps <path>] [--config <path>]");
+  writeLine(out, "  agent generate-context [--in <path>] [--template <uri>] [--var k=v]... [--out <path>] [--token <t>]");
   writeLine(out, "  ops deploy --entity <id> [--artifact <uri>] [-m <status>] [--stage-only|--commit]");
   writeLine(out, "  verify");
   writeLine(out, "  journal [--since <2h|2025-...>] [--limit N] [--types a,b] [--entity <id>] [--active]");
   writeLine(out, "  server [--port <port>] [--token <token>]");
   writeLine(out, "  ui [--port <port>]");
+  writeLine(out, "  run dispatch --playbook <path>@<ver> [--run-id <id>] [--overrides-file <path>]");
+  writeLine(out, "  run playbook --playbook <path>@<ver> [--run-id <id>] [--overrides-file <path>] [--max-iterations N] [--json]");
+  writeLine(out, "  run reconcile [--run-id <id>] [--max-transitions N] [--dry-run] [--json]");
+  writeLine(out, "  run tick [--run-id <id>] [--max-transitions N] [--dry-run] [--json]");
+  writeLine(out, "  run sweep [--max N]");
+  writeLine(out, "  run resume --run-id <id> [-m <msg>]");
+  writeLine(out, "  run complete-step --run-id <id> [-m <msg>]");
+  writeLine(out, "  hook exec --plan <path|-> [--dry-run]");
   writeLine(out, "  hooks install|uninstall");
   writeLine(out, "  webhook status");
   writeLine(out, "  webhook test --url <url> [--type <type>]");
+  writeLine(out, "  parse --type codex [--pretty] [--out <path>]");
   return 0;
 }

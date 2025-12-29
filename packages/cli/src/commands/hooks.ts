@@ -1,4 +1,5 @@
 import type { CommandArgs } from "./types.js";
+import path from "node:path";
 import fs from "node:fs/promises";
 import { gitPath } from "../git.js";
 
@@ -9,7 +10,8 @@ export async function handleHooks(args: CommandArgs): Promise<number | undefined
     args.io.writeLine(args.io.err, "usage: git a5c hooks install|uninstall");
     return 2;
   }
-  const hooksDir = await gitPath(args.repoRoot, "hooks");
+  const hooksDirRaw = await gitPath(args.repoRoot, "hooks");
+  const hooksDir = path.isAbsolute(hooksDirRaw) ? hooksDirRaw : path.join(args.repoRoot, hooksDirRaw);
   const hookFiles = ["post-commit", "post-merge"];
   if (sub === "uninstall") {
     for (const f of hookFiles) {

@@ -1,0 +1,13 @@
+cli:
+  echo:
+    description: Echo agent used for tests
+    cli_command: "node .a5c/agents/echo-agent.js"
+    envs:
+      A5C_ECHO_PROMPT_PATH: "{{prompt_path}}"
+      A5C_ECHO_OUTPUT_PATH: "{{output_last_message_path}}"
+profiles:
+  default:
+    default: true
+    cli: echo
+    model: "test-model"
+

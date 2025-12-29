@@ -1,0 +1,11 @@
+schema: a5cforge/v1
+kind: hook-mapping
+version: v1
+
+step_hooks:
+  agent: agent/[profile]
+  reward: reward
+
+evidence_hooks:
+  command: command
+

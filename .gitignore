@@ -8,3 +8,4 @@ packages/server/test/**/*.js
 
 .tmp/
 .env
+.tmp_*.ts

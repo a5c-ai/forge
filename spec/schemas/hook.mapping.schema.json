@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a5cforge.dev/schemas/a5cforge-v1/hook.mapping.schema.json",
+  "title": "a5cforge/v1 - hook mapping",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["schema", "kind", "version", "step_hooks", "evidence_hooks"],
+  "properties": {
+    "schema": { "const": "a5cforge/v1" },
+    "kind": { "const": "hook-mapping" },
+    "version": { "const": "v1" },
+    "step_hooks": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["agent", "reward"],
+      "properties": {
+        "agent": { "type": "string", "minLength": 1 },
+        "reward": { "type": "string", "minLength": 1 }
+      }
+    },
+    "evidence_hooks": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["command"],
+      "properties": { "command": { "type": "string", "minLength": 1 } }
+    }
+  }
+}

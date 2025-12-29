@@ -1,0 +1,9 @@
+template_id: sweep_min
+version: v1
+name: Sweep Minimal
+description: For testing run sweep
+steps:
+  - step_id: 1
+    name: Step 1
+    type: agent
+    instructions: "noop"

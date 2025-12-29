@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a5cforge.dev/schemas/a5cforge-v1/run.reconcile.plan.schema.json",
+  "title": "a5cforge/v1 - reconcile plan envelope",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["actor", "treeish", "plans"],
+  "properties": {
+    "actor": { "type": "string" },
+    "treeish": { "type": "string" },
+    "plans": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["run_id", "kind"],
+        "properties": {
+          "run_id": { "type": "string", "minLength": 1 },
+          "kind": { "type": "string", "enum": ["EXECUTE_STEP", "WAIT_HUMAN", "WAIT_DEPS"] },
+          "reason": { "type": "string" },
+          "step_id": { "type": "integer", "minimum": 0 },
+          "attempt": { "type": "integer", "minimum": 0 },
+          "step_type": { "type": "string" },
+          "hook": { "type": "string" },
+          "hook_input": { "$ref": "./run.hook.step.input.schema.json" },
+          "deps": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "pending": { "type": "array", "items": { "type": "string" } },
+              "completed": { "type": "array", "items": { "type": "string" } }
+            }
+          },
+          "events_to_emit": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
+          "events_to_emit_before": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
+          "events_expected_after": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}
+

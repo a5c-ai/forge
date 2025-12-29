@@ -16,6 +16,9 @@ import { handleVerify } from "./commands/verify.js";
 import { handleJournal } from "./commands/journal.js";
 import { handleServer } from "./commands/server.js";
 import { handleUi } from "./commands/ui.js";
+import { handleRunOrchestration } from "./commands/runOrchestration.js";
+import { handleHookExec } from "./commands/hookExec.js";
+import { handleParse } from "./commands/parse.js";
 import { autoPullForRead } from "./sync.js";
 
 export type RunOptions = {
@@ -88,8 +91,11 @@ export async function runCli(argv: string[], opts: RunOptions = {}): Promise<num
 
   const handlers: Array<() => number | undefined | Promise<number | undefined>> = [
     () => handleHelp(baseArgs),
+    () => handleParse(baseArgs),
     () => handleServer(baseArgs),
     () => handleUi(baseArgs),
+    () => handleHookExec(baseArgs),
+    () => handleRunOrchestration(baseArgs),
     () => handleWebhook(baseArgs),
     () => handleStatus(baseArgs),
     () => handleIssue(baseArgs),

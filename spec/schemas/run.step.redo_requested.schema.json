@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a5cforge.dev/schemas/a5cforge-v1/run.step.redo_requested.schema.json",
+  "title": "a5cforge/v1 - run.step.redo_requested",
+  "allOf": [
+    { "$ref": "./event.base.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "run.step.redo_requested" },
+        "payload": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["run_id", "target_step_id", "target_attempt"],
+          "properties": {
+            "run_id": { "type": "string", "minLength": 1 },
+            "target_step_id": { "type": "integer", "minimum": 0 },
+            "target_attempt": { "type": "integer", "minimum": 0 },
+            "reason": { "type": "string" }
+          }
+        }
+      }
+    }
+  ]
+}
+

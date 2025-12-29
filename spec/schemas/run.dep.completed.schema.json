@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a5cforge.dev/schemas/a5cforge-v1/run.dep.completed.schema.json",
+  "title": "a5cforge/v1 - run.dep.completed",
+  "allOf": [
+    { "$ref": "./event.base.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "run.dep.completed" },
+        "payload": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["run_id", "dep_run_id"],
+          "properties": {
+            "run_id": { "type": "string", "minLength": 1 },
+            "dep_run_id": { "type": "string", "minLength": 1 },
+            "observed_at": { "type": "string", "format": "date-time" }
+          }
+        }
+      }
+    }
+  ]
+}
+

@@ -1,0 +1,25 @@
+template_id: web_feature
+version: v1
+name: Web Feature (fixture repo-min)
+description: End-to-end orchestration fixture that exercises agent generate-context + agent run
+
+steps:
+  - step_id: 1
+    name: Agent
+    type: agent
+    agent:
+      profile: default
+    instructions: |
+      Demonstrate an end-to-end orchestration run.
+
+      The agent hook renders a prompt via `agent generate-context` then invokes `agent run`.
+    breakpoint:
+      enabled: false
+
+  - step_id: 2
+    name: Reward
+    type: reward
+    instructions: Always pass.
+    breakpoint:
+      enabled: false
+

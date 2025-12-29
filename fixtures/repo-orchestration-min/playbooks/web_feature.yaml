@@ -1,0 +1,49 @@
+template_id: web_feature
+version: v1
+name: Web Feature Playbook
+description: Minimal orchestration fixture
+steps:
+  - step_id: 1
+    name: Intake
+    type: agent
+    instructions: Summarize scope and plan.
+    breakpoint:
+      enabled: false
+  - step_id: 2
+    name: Clarify
+    type: human
+    instructions: Confirm acceptance criteria.
+    breakpoint:
+      enabled: true
+  - step_id: 3
+    name: Implement
+    type: agent
+    instructions: Implement; add notes.
+    breakpoint:
+      enabled: false
+  - step_id: 4
+    name: Reward
+    type: reward
+    instructions: Run unit signal; report reward.
+    breakpoint:
+      enabled: false
+    reward:
+      signals: [unit]
+      policy:
+        on_fail: auto_redo
+        redo_target_step_id: 3
+      thresholds:
+        pass: 0.8
+signals:
+  unit:
+    severity: HARD
+    weight: 1
+    producer: jest
+    producer_args:
+      cmd: pnpm test
+    scoring:
+      mode: pass_fail
+evidence_producers:
+  jest:
+    kind: command
+    default_outputs: [unit_report]

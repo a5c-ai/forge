@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a5cforge.dev/schemas/a5cforge-v1/run.hook.evidence.input.schema.json",
+  "title": "a5cforge/v1 - evidence producer hook input",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["run_id", "step_id", "attempt", "signal_id", "producer", "artifact_root"],
+  "properties": {
+    "run_id": { "type": "string", "minLength": 1 },
+    "step_id": { "type": "integer", "minimum": 0 },
+    "attempt": { "type": "integer", "minimum": 0 },
+    "signal_id": { "type": "string", "minLength": 1 },
+    "producer": { "type": "string", "minLength": 1 },
+    "producer_args": { "type": "object", "additionalProperties": true },
+    "artifact_root": { "type": "string", "minLength": 1 }
+  }
+}
+

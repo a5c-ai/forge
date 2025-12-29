@@ -1,0 +1,29 @@
+template_id: web_feature
+version: v1
+name: Web Feature (repo-min example)
+description: Minimal end-to-end orchestration example (agent + reward)
+
+steps:
+  - step_id: 1
+    name: Agent
+    type: agent
+    agent:
+      profile: default
+    instructions: |
+      Demonstrate an end-to-end orchestration run.
+
+      - The agent hook will render a Markdown prompt via `git a5c agent generate-context`.
+      - Then it will invoke a repo-configured agent via `git a5c agent run`.
+
+      For this repo-min example, the agent is a tiny echo script.
+    breakpoint:
+      enabled: false
+
+  - step_id: 2
+    name: Reward
+    type: reward
+    instructions: |
+      Always pass (repo-min example).
+    breakpoint:
+      enabled: false
+

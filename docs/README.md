@@ -20,6 +20,8 @@ a5cforge is a Git-first, event-sourced collaboration system. The source of truth
   - User guide (local mode): `docs/guides/user-guide.md`
   - Admin guide (remote mode): `docs/guides/admin-guide.md`
   - Troubleshooting + FAQ: `docs/guides/troubleshooting.md`
+- **Orchestration**
+  - Index: `docs/orchestration/README.md`
 - **Architecture**
   - Overview: `docs/architecture/overview.md`
   - Data model (`.collab/**`): `docs/architecture/data-model.md`

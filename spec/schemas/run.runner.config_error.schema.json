@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a5cforge.dev/schemas/a5cforge-v1/run.runner.config_error.schema.json",
+  "title": "a5cforge/v1 - run.runner.config_error",
+  "allOf": [
+    { "$ref": "./event.base.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "run.runner.config_error" },
+        "payload": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["run_id", "message"],
+          "properties": {
+            "run_id": { "type": "string", "minLength": 1 },
+            "message": { "type": "string", "minLength": 1 },
+            "path": { "type": "string" }
+          }
+        }
+      }
+    }
+  ]
+}
+

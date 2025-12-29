@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a5cforge.dev/schemas/a5cforge-v1/run.playbook.result.schema.json",
+  "title": "a5cforge/v1 - run playbook result",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["schema", "kind", "run_id", "status", "iterations"],
+  "properties": {
+    "schema": { "type": "string", "const": "a5cforge/v1" },
+    "kind": { "type": "string", "const": "run.playbook.result" },
+    "run_id": { "type": "string", "minLength": 1 },
+    "status": {
+      "type": "string",
+      "enum": ["DONE", "CANCELLED", "WAIT_HUMAN", "WAIT_DEPS", "UNKNOWN"]
+    },
+    "iterations": { "type": "integer", "minimum": 0 },
+    "runs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["run_id", "status"],
+        "properties": {
+          "run_id": { "type": "string", "minLength": 1 },
+          "status": { "type": "string" },
+          "playbook": { "type": "string" }
+        }
+      }
+    },
+    "last_plans": { "$ref": "./run.reconcile.plan.schema.json" }
+  }
+}
+

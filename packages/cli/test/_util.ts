@@ -39,7 +39,10 @@ export async function makeRepoFromFixture(fixtureName: string): Promise<string> 
   await copyDir(fixture, dir);
   await run("git", ["init", "-q", "-b", "main"], dir);
   await run("git", ["add", "-A"], dir);
-  await run("git", ["add", "-f", ".collab"], dir);
+  try {
+    await fs.stat(path.join(dir, ".collab"));
+    await run("git", ["add", "-f", ".collab"], dir);
+  } catch {}
   await run("git", ["-c", "user.name=test", "-c", "user.email=test@example.com", "commit", "-q", "-m", "fixture"], dir);
   return dir;
 }

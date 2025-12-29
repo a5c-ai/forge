@@ -38,7 +38,8 @@ describe("CLI write commands (Phase 5)", () => {
     await runCli(["hooks", "install", "--repo", repo], { stdout: () => {}, stderr: () => {} });
 
     // Create an unmanaged hook and ensure uninstall doesn't delete it.
-    const hooksDir = (await run("git", ["rev-parse", "--git-path", "hooks"], repo)).stdout.trim();
+    const hooksDirRaw = (await run("git", ["rev-parse", "--git-path", "hooks"], repo)).stdout.trim();
+    const hooksDir = path.isAbsolute(hooksDirRaw) ? hooksDirRaw : path.join(repo, hooksDirRaw);
     await fs.mkdir(hooksDir, { recursive: true });
     const unmanaged = path.join(hooksDir, "pre-commit");
     await fs.writeFile(unmanaged, "#!/bin/sh\necho unmanaged\n", "utf8");

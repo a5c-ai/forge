@@ -1,0 +1,7 @@
+{"type":"banner","timestamp":"2025-09-19T11:58:08","raw":"OpenAI Codex v1.2.3\n---------------------\nModel: gpt-4.1\nMode: agent\n---------------------","fields":{"Model":"gpt-4.1","Mode":"agent","version":"v1.2.3"}}
+{"type":"user_instructions_event","timestamp":"2025-09-19T11:58:09","raw":"User instructions:\nDo the thing."}
+{"type":"thinking","timestamp":"2025-09-19T11:58:10","raw":"thinking\nI should think.","fields":{"thought":"I should think."}}
+{"type":"exec","timestamp":"2025-09-19T11:58:11","raw":"exec echo hi in C:\\\\tmp","fields":{"command":"echo hi","cwd":"C:\\\\tmp"}}
+{"type":"exec_result","timestamp":"2025-09-19T11:58:12","raw":"echo hi succeeded in 12ms:\nhi","fields":{"command":"echo hi","cwd":"C:\\tmp","status":"succeeded","durationMs":12,"result":"hi"}}
+{"type":"tokens_used","timestamp":"2025-09-19T11:58:13","raw":"tokens used: 123","fields":{"tokens":123}}
+

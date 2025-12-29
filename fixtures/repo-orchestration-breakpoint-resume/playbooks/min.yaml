@@ -1,0 +1,11 @@
+template_id: breakpoint_resume
+version: v1
+name: Breakpoint Resume
+description: step1 is breakpointed
+steps:
+  - step_id: 1
+    name: Step 1
+    type: agent
+    instructions: noop
+    breakpoint:
+      enabled: true

@@ -1,0 +1,33 @@
+template_id: reward_redo
+version: v1
+name: Reward Redo Playbook
+description: Reward failure triggers redo
+steps:
+  - step_id: 1
+    name: Implement
+    type: agent
+    instructions: Do the thing.
+    breakpoint:
+      enabled: false
+  - step_id: 2
+    name: Reward
+    type: reward
+    instructions: Evaluate.
+    breakpoint:
+      enabled: false
+    reward:
+      signals: [unit]
+      policy:
+        on_fail: auto_redo
+        redo_target_step_id: 1
+      thresholds:
+        pass: 0.8
+signals:
+  unit:
+    severity: HARD
+    weight: 1
+    producer: jest
+    producer_args:
+      cmd: pnpm test
+    scoring:
+      mode: pass_fail

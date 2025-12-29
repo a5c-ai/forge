@@ -1,0 +1,13 @@
+template_id: deps_parent
+version: v1
+name: Deps Parent
+description: Parent playbook that spawns a dependent run.
+steps:
+  - step_id: 1
+    name: Spawn dep
+    type: agent
+    instructions: "spawn a dependent"
+  - step_id: 2
+    name: After deps
+    type: agent
+    instructions: "runs after dependency completes"

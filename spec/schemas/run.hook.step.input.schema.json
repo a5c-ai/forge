@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a5cforge.dev/schemas/a5cforge-v1/run.hook.step.input.schema.json",
+  "title": "a5cforge/v1 - step hook input",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["run_id", "step_id", "attempt"],
+  "properties": {
+    "run_id": { "type": "string", "minLength": 1 },
+    "step_id": { "type": "integer", "minimum": 0 },
+    "attempt": { "type": "integer", "minimum": 0 },
+    "instructions": { "type": "string" },
+    "agent": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": { "profile": { "type": "string" } }
+    },
+    "hook_mapping": { "$ref": "./hook.mapping.schema.json" },
+    "state": { "type": "object", "additionalProperties": true },
+    "template": { "type": "object", "additionalProperties": true }
+  }
+}

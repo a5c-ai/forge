@@ -10,9 +10,15 @@ import {
   writeAgentHeartbeat,
   writeAgentDispatchCreated
 } from "@a5c-ai/sdk";
+import { handleAgentRun } from "./agentRun.js";
+import { handleAgentGenerateContext } from "./agentGenerateContext.js";
 
 export async function handleAgent(args: CommandArgs): Promise<number | undefined> {
   if (args.positionals[0] !== "agent") return;
+  const runRes = await handleAgentRun(args);
+  if (runRes !== undefined) return runRes;
+  const genRes = await handleAgentGenerateContext(args);
+  if (genRes !== undefined) return genRes;
   const sub = args.positionals[1];
   const actor = process.env.A5C_ACTOR ?? (await gitConfigGet(args.repoRoot, "user.name")) ?? "unknown";
   const persisted = (await loadHlcState(actor)) ?? { wallMs: 0, counter: 0 };

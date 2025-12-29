@@ -1,0 +1,73 @@
+template_id: issue_agent_score_redo
+version: v1
+name: Issue → Agent → Evidence Score (redo)
+description: Like issue_agent_score, but reward failure triggers auto_redo of the agent step.
+
+steps:
+  - step_id: 1
+    name: Agent
+    type: agent
+    agent:
+      profile: default
+    instructions: |
+      Work on issue `issue_100`.
+
+      This run is expected to redo the agent step if reward fails.
+    breakpoint:
+      enabled: false
+
+  - step_id: 2
+    name: Reward (initial)
+    type: reward
+    instructions: |
+      Compute reward from evidence producers.
+    reward:
+      signals: [unit, visual]
+      policy:
+        on_fail: auto_redo
+        redo_target_step_id: 1
+      thresholds:
+        pass: 0.8
+    breakpoint:
+      enabled: false
+
+  - step_id: 3
+    name: Reward (final)
+    type: reward
+    instructions: |
+      Recompute reward after redo.
+    reward:
+      signals: [unit, visual]
+      policy:
+        on_fail: pause
+      thresholds:
+        pass: 0.8
+    breakpoint:
+      enabled: false
+
+signals:
+  unit:
+    severity: HARD
+    weight: 0.5
+    producer: unit_prod
+    producer_args:
+      cmd: "pnpm test"
+    scoring:
+      mode: pass_fail
+  visual:
+    severity: SOFT
+    weight: 0.5
+    producer: visual_prod
+    producer_args:
+      cmd: "pnpm test:visual"
+    scoring:
+      mode: diff_ratio
+      pass_if_lte: 0.02
+
+evidence_producers:
+  unit_prod:
+    kind: command
+    default_outputs: [unit_report]
+  visual_prod:
+    kind: command
+    default_outputs: [visual_report]

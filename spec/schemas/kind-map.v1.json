@@ -16,7 +16,23 @@
     "agent.ack.created": "agent.ack.created.schema.json",
     "agent.nack.created": "agent.nack.created.schema.json",
     "agent.progress.created": "agent.progress.created.schema.json",
-    "ops.event.created": "ops.event.created.schema.json"
+    "ops.event.created": "ops.event.created.schema.json",
+    "run.dispatched": "run.dispatched.schema.json",
+    "run.step.scheduled": "run.step.scheduled.schema.json",
+    "run.step.started": "run.step.started.schema.json",
+    "run.step.completed": "run.step.completed.schema.json",
+    "run.step.failed": "run.step.failed.schema.json",
+    "run.step.exec.started": "run.step.exec.started.schema.json",
+    "run.step.heartbeat": "run.step.heartbeat.schema.json",
+    "run.reward.reported": "run.reward.reported.schema.json",
+    "run.human.waiting": "run.human.waiting.schema.json",
+    "run.human.resumed": "run.human.resumed.schema.json",
+    "run.human.completed_step": "run.human.completed_step.schema.json",
+    "run.step.redo_requested": "run.step.redo_requested.schema.json",
+    "run.step.exec.timed_out": "run.step.exec.timed_out.schema.json",
+    "run.dep.spawned": "run.dep.spawned.schema.json",
+    "run.dep.completed": "run.dep.completed.schema.json",
+    "run.runner.config_error": "run.runner.config_error.schema.json"
   }
 }
 

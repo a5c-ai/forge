@@ -1,0 +1,9 @@
+template_id: dispatch_min
+version: v1
+name: Dispatch Minimal
+description: For testing run dispatch
+steps:
+  - step_id: 1
+    name: Step 1
+    type: agent
+    instructions: "noop"

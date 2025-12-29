@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a5cforge.dev/schemas/a5cforge-v1/run.hook.step.output.agent.schema.json",
+  "title": "a5cforge/v1 - agent step hook output",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["ok"],
+  "properties": {
+    "ok": { "type": "boolean" },
+    "error": { "type": "string" },
+    "artifacts": { "type": "array", "items": { "type": "string" } },
+    "spawn": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "playbook": { "type": "string" },
+          "template_ref": { "type": "string" },
+          "dispatch": { "type": "object", "additionalProperties": true }
+        }
+      }
+    },
+    "links": { "type": "object", "additionalProperties": true }
+  }
+}
+

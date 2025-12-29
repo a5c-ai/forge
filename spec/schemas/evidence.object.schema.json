@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a5cforge.dev/schemas/a5cforge-v1/evidence.object.schema.json",
+  "title": "a5cforge/v1 - evidence object",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["evidence_id", "kind"],
+  "properties": {
+    "evidence_id": { "type": "string", "minLength": 1 },
+    "kind": { "type": "string", "enum": ["report", "diff", "log", "artifact", "metric"] },
+    "paths": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "summary": { "type": "string" },
+    "metrics": { "type": "object", "additionalProperties": true },
+    "mime": { "type": "string" }
+  }
+}
+
