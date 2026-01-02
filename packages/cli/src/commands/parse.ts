@@ -12,7 +12,8 @@ export type CodexEvent = {
     | "codex"
     | "exec"
     | "exec_result"
-    | "banner";
+    | "banner"
+    | "agent_output_footer";
   timestamp: string;
   raw: string;
   fields?: Record<string, unknown>;
@@ -278,9 +279,39 @@ export async function handleParse(args: CommandArgs): Promise<number | undefined
   const cmd = args.positionals[0];
   if (cmd !== "parse") return;
 
-  if ((args.flags.type || "").toLowerCase() !== "codex") {
-    args.io.writeLine(args.io.err, "parse: unsupported --type (expected 'codex')");
+  const type = String(args.flags.type || "codex")
+    .trim()
+    .toLowerCase()
+    .replaceAll("_", "-");
+
+  if (type !== "codex" && type !== "agent-footer") {
+    args.io.writeLine(args.io.err, "parse: unsupported --type (expected 'codex' or 'agent-footer')");
     return 2;
+  }
+
+  if (type === "agent-footer") {
+    try {
+      const stdinText = await readAllStdinText();
+      const extracted = extractAgentFooter(stdinText);
+      const evt: CodexEvent = {
+        type: "agent_output_footer",
+        timestamp: new Date(args.nowMs()).toISOString(),
+        raw: extracted.raw,
+        fields: extracted.fields
+      };
+
+      const outText = args.flags.pretty ? JSON.stringify(evt, null, 2) : JSON.stringify(evt);
+      if (args.flags.out) {
+        const outPath = path.isAbsolute(args.flags.out) ? args.flags.out : path.resolve(args.repoRoot, args.flags.out);
+        fs.mkdirSync(path.dirname(outPath), { recursive: true });
+        fs.writeFileSync(outPath, outText + "\n", "utf8");
+      }
+      args.io.writeLine(args.io.out, outText);
+      return 0;
+    } catch (e: any) {
+      args.io.writeLine(args.io.err, `parse: ${String(e?.message ?? e)}`);
+      return 2;
+    }
   }
 
   const parser = new CodexStdoutParser();
@@ -316,5 +347,83 @@ export async function handleParse(args: CommandArgs): Promise<number | undefined
       resolve(0);
     });
   });
+}
+
+async function readAllStdinText(): Promise<string> {
+  const chunks: Buffer[] = [];
+  for await (const ch of process.stdin) chunks.push(Buffer.from(ch));
+  return Buffer.concat(chunks).toString("utf8");
+}
+
+function extractAgentFooter(input: string): { raw: string; fields: Record<string, unknown> } {
+  const trimmed = String(input ?? "").trim();
+  if (!trimmed) throw new Error("no input");
+
+  // Accept raw JSON as input.
+  if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+    const obj = safeJsonParse(trimmed);
+    if (obj && typeof obj === "object") return { raw: trimmed, fields: obj as any };
+  }
+
+  const blocks = extractFencedCodeBlocks(trimmed);
+  const candidates = blocks.filter((b) => b.lang === "json" || b.lang === "");
+
+  let lastParsed: any | undefined;
+  let lastParsedRaw: string | undefined;
+  for (const c of candidates) {
+    const raw = c.content.trim();
+    if (!raw) continue;
+    try {
+      const parsed = JSON.parse(raw);
+      lastParsed = parsed;
+      lastParsedRaw = raw;
+      if (parsed && typeof parsed === "object" && parsed.kind === "agent.output.footer") {
+        return { raw, fields: parsed };
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  if (lastParsed && typeof lastParsed === "object") return { raw: lastParsedRaw ?? "", fields: lastParsed };
+
+  throw new Error("agent footer JSON not found");
+}
+
+function safeJsonParse(txt: string): any {
+  try {
+    return JSON.parse(txt);
+  } catch {
+    return undefined;
+  }
+}
+
+function extractFencedCodeBlocks(md: string): Array<{ lang: string; content: string }> {
+  const lines = md.split(/\r?\n/);
+  const out: Array<{ lang: string; content: string }> = [];
+
+  let inFence = false;
+  let fenceLang = "";
+  let buf: string[] = [];
+
+  for (const line of lines) {
+    const m = /^```(\w+)?\s*$/.exec(line.trimEnd());
+    if (m) {
+      if (!inFence) {
+        inFence = true;
+        fenceLang = String(m[1] ?? "").trim().toLowerCase();
+        buf = [];
+      } else {
+        out.push({ lang: fenceLang, content: buf.join("\n") });
+        inFence = false;
+        fenceLang = "";
+        buf = [];
+      }
+      continue;
+    }
+    if (inFence) buf.push(line);
+  }
+
+  return out;
 }
 

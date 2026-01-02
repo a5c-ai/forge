@@ -159,7 +159,8 @@ export async function handleRunOrchestration(args: CommandArgs): Promise<number 
           runId: id,
           maxTransitions: 1,
           emitNonExecEvents: true,
-          actor: "runner:playbook"
+          actor: "runner:playbook",
+          agentProfileOverride: args.flags.agentProfile
         });
         lastEnvelope = env;
         allPlans.push(...(env.plans ?? []));

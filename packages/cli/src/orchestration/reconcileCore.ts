@@ -53,6 +53,7 @@ export async function reconcileOrchestration(opts: {
   emitNonExecEvents?: boolean;
   runId?: string;
   maxTransitions?: number;
+  agentProfileOverride?: string;
 }): Promise<ReconcileEnvelope> {
   const actor = opts.actor ?? "runner:cli";
   const commitOid = await opts.repoGit.revParse(opts.treeish);
@@ -171,12 +172,21 @@ export async function reconcileOrchestration(opts: {
 
     if (t.kind === "EXECUTE_STEP") {
       const hookName = t.step_type === "agent" ? hookMapping.step_hooks.agent : hookMapping.step_hooks.reward;
-      const agentProfile = t.step_type === "agent" ? String((t.hook_input as any)?.agent?.profile ?? "default") : "";
+
+      const baseAgentProfile = t.step_type === "agent" ? String((t.hook_input as any)?.agent?.profile ?? "default") : "";
+      const agentProfile = t.step_type === "agent" ? String(opts.agentProfileOverride || baseAgentProfile) : "";
 
       const resolvedName = String(hookName).includes("[profile]") ? String(hookName).replaceAll("[profile]", agentProfile) : String(hookName);
       const hook = path.posix.join(".a5c/hooks/steps", resolvedName) + ".js";
+
+      const baseHookInput = t.hook_input ?? {};
+      const overriddenHookInput =
+        t.step_type === "agent" && opts.agentProfileOverride
+          ? { ...baseHookInput, agent: { ...(baseHookInput as any)?.agent, profile: opts.agentProfileOverride } }
+          : baseHookInput;
+
       const hook_input = {
-        ...t.hook_input,
+        ...(overriddenHookInput ?? {}),
         hook_mapping: hookMapping
       };
       plans.push({ run_id: meta.runId, ...t, hook, hook_input });

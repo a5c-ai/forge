@@ -2,6 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { spawn } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import yaml from "js-yaml";
 import type { CommandArgs } from "./types.js";
 import { readTextFromUri } from "../util/uri.js";
@@ -130,26 +131,41 @@ function resolveUri(raw: string): { scheme: string; path: string } {
 }
 
 async function loadPredefined(args: CommandArgs): Promise<PredefinedSpec> {
-  const base = readBundledPredefined(args);
-  if (!args.flags.config) return base;
+  let merged = readBundledPredefined();
+  merged = deepMerge(merged, readRepoPredefined(args));
+  if (!args.flags.config) return merged;
   const cfgText = await readTextFromUri({
     repoRoot: args.repoRoot,
     uriOrPath: args.flags.config,
     token: process.env.A5C_AGENT_GITHUB_TOKEN || process.env.GITHUB_TOKEN
   });
   const cfg = (yaml.load(cfgText) as any) || {};
-  return deepMerge(base, cfg);
+  return deepMerge(merged, cfg);
 }
 
-function readBundledPredefined(args: CommandArgs): PredefinedSpec {
+function readBundledPredefined(): PredefinedSpec {
+  // In the monorepo, this file lives at `packages/cli/predefined.yaml`.
+  // In built output, it may also be copied to `dist/predefined.yaml`.
+  const here = path.dirname(fileURLToPath(import.meta.url));
+  const candidates = [path.resolve(here, "..", "..", "predefined.yaml"), path.resolve(here, "..", "..", "..", "predefined.yaml")];
+
+  for (const p of candidates) {
+    if (!fs.existsSync(p)) continue;
+    const parsed = yaml.load(fs.readFileSync(p, "utf8")) as PredefinedSpec;
+    if (parsed && parsed.cli && parsed.profiles) return parsed;
+  }
+
+  throw new Error("agent run: bundled predefined.yaml not found");
+}
+
+function readRepoPredefined(args: CommandArgs): Partial<PredefinedSpec> {
   const candidates = [path.resolve(args.repoRoot, ".a5c", "predefined.yaml"), path.resolve(args.repoRoot, "predefined.yaml")];
   for (const p of candidates) {
-    if (fs.existsSync(p)) {
-      const parsed = yaml.load(fs.readFileSync(p, "utf8")) as PredefinedSpec;
-      if (parsed && parsed.cli && parsed.profiles) return parsed;
-    }
+    if (!fs.existsSync(p)) continue;
+    const parsed = (yaml.load(fs.readFileSync(p, "utf8")) as any) || {};
+    if (parsed && typeof parsed === "object") return parsed as Partial<PredefinedSpec>;
   }
-  throw new Error("agent run: predefined.yaml not found (expected .a5c/predefined.yaml or predefined.yaml)");
+  return {};
 }
 
 function findDefaultProfileName(spec: PredefinedSpec): string | undefined {

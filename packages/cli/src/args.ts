@@ -54,6 +54,7 @@ export type ParsedArgs = {
     vars?: Record<string, string>;
     pretty?: boolean;
     maxIterations?: number;
+    agentProfile?: string;
   };
   positionals: string[];
 };
@@ -110,6 +111,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
     else if (a === "--max") flags.max = Number(args.shift()!);
     else if (a === "--max-transitions") flags.maxTransitions = Number(args.shift()!);
     else if (a === "--max-iterations") flags.maxIterations = Number(args.shift()!);
+    else if (a === "--agent-profile") flags.agentProfile = args.shift()!;
     else if (a === "--dry-run") flags.dryRun = true;
     else if (a === "--in") flags.in = args.shift()!;
     else if (a === "--out") flags.out = args.shift()!;
