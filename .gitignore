@@ -9,3 +9,6 @@ packages/server/test/**/*.js
 .tmp/
 .env
 .tmp_*.ts
+.tmp_*.yaml
+.tmp_*.*
+.a5c/runs/**/**

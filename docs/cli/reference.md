@@ -32,6 +32,18 @@ If `git a5c` is not found, ensure pnpm's global bin dir is on your `PATH` (run `
 git a5c status [--json] [--treeish <ref>]
 ```
 
+## o
+
+```bash
+git a5c o [args...]
+```
+
+`git a5c o init` can populate `.a5c/functions`, `.a5c/processes`, and `.a5c/o.md` from a registry (default: `https://github.com/a5c-ai/forge`):
+
+```bash
+git a5c o init --registry <path|url>
+```
+
 ## issue
 
 ```bash

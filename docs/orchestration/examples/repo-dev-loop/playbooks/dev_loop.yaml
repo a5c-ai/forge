@@ -1,0 +1,47 @@
+template_id: dev_loop
+version: v1
+name: Dev Loop (agent + CI scoring)
+description: Agent step produces changes, reward step scores via evidence.
+
+steps:
+  - step_id: 1
+    name: Implement
+    type: agent
+    agent:
+      # The runner can override this at runtime via:
+      # `git a5c run playbook --agent-profile ...`
+      profile: default
+    instructions: |
+      Implement the task described in the prompt.
+
+      Constraints:
+      - Keep changes minimal.
+      - Ensure `npm run test:ci` passes.
+
+  - step_id: 2
+    name: Score
+    type: reward
+    instructions: |
+      Score the run using evidence producers.
+    reward:
+      signals: [ci]
+      policy:
+        on_fail: pause
+      thresholds:
+        pass: 1
+
+signals:
+  ci:
+    severity: HARD
+    weight: 1
+    producer: ci_prod
+    producer_args:
+      cmd: "npm run test:ci"
+    scoring:
+      mode: pass_fail
+
+evidence_producers:
+  ci_prod:
+    kind: command
+    default_outputs: [ci_report]
+

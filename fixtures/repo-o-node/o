@@ -1,0 +1,8 @@
+#!/usr/bin/env node
+const args = process.argv.slice(2);
+if (args[0] === "help") {
+  process.stdout.write("O_HELP_OK\n");
+  process.exit(0);
+}
+process.stdout.write(`O_ARGS=${args.join(",")}\n`);
+

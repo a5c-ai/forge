@@ -1,0 +1,8 @@
+step_hooks:
+  # Use a single hook file and pass the profile through the hook input.
+  agent: agent/default
+  reward: reward
+
+evidence_hooks:
+  command: command
+

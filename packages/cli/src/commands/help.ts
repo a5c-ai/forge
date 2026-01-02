@@ -12,6 +12,7 @@ export function handleHelp(args: CommandArgs): number | undefined {
   writeLine(out, "");
   writeLine(out, "Commands:");
   writeLine(out, "  status");
+  writeLine(out, "  o [args...]");
   writeLine(out, "  issue list");
   writeLine(out, "  issue show <id>");
   writeLine(out, "  issue new --title <t> [--body <b>] [--stage-only|--commit]");

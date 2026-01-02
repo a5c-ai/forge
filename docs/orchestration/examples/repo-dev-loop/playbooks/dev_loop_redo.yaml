@@ -1,0 +1,63 @@
+template_id: dev_loop_redo
+version: v1
+name: Dev Loop (auto redo)
+description: Reward step can request an automatic redo on failure.
+
+steps:
+  - step_id: 1
+    name: Implement
+    type: agent
+    agent:
+      profile: default
+    instructions: |
+      Implement the task described in the prompt.
+      Ensure `npm run test:ci` passes.
+
+  - step_id: 2
+    name: Score
+    type: reward
+    instructions: |
+      Score the run using evidence producers.
+    reward:
+      signals: [ci]
+      policy:
+        on_fail: auto_redo
+      thresholds:
+        pass: 1
+
+  - step_id: 3
+    name: Redo
+    type: agent
+    agent:
+      profile: default
+    instructions: |
+      The previous attempt did not meet the CI threshold.
+      Make the smallest possible change to fix CI.
+
+  - step_id: 4
+    name: Score again
+    type: reward
+    instructions: |
+      Re-score the run.
+    reward:
+      signals: [ci]
+      policy:
+        on_fail: pause
+      thresholds:
+        pass: 1
+
+signals:
+  ci:
+    severity: HARD
+    weight: 1
+    producer: ci_prod
+    producer_args:
+      cmd: "npm run test:ci"
+    scoring:
+      mode: pass_fail
+
+evidence_producers:
+  ci_prod:
+    kind: command
+    default_outputs: [ci_report]
+

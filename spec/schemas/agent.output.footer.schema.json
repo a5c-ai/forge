@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a5cforge.dev/schemas/a5cforge-v1/agent.output.footer.schema.json",
+  "title": "a5cforge/v1 - agent output footer (machine-readable)",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["schema", "kind", "run_id", "step_id", "attempt", "profile", "status", "summary", "changes", "commands", "artifacts", "events_to_write"],
+  "properties": {
+    "schema": { "type": "string", "const": "a5cforge/v1" },
+    "kind": { "type": "string", "const": "agent.output.footer" },
+    "run_id": { "type": "string", "minLength": 1 },
+    "step_id": { "type": "integer", "minimum": 0 },
+    "attempt": { "type": "integer", "minimum": 0 },
+    "profile": { "type": "string", "minLength": 1 },
+    "status": { "type": "string", "enum": ["ok", "needs_human", "blocked", "error"] },
+    "summary": { "type": "string" },
+    "changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["path", "op"],
+        "properties": {
+          "path": { "type": "string", "minLength": 1 },
+          "op": { "type": "string", "enum": ["added", "modified", "deleted", "renamed"] }
+        }
+      }
+    },
+    "commands": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["cmd"],
+        "properties": {
+          "cmd": { "type": "string", "minLength": 1 },
+          "exit_code": { "type": "integer" }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["path", "kind"],
+        "properties": {
+          "path": { "type": "string", "minLength": 1 },
+          "kind": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "events_to_write": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["kind", "payload"],
+        "properties": {
+          "kind": { "type": "string", "minLength": 1 },
+          "payload": { "type": "object", "additionalProperties": true }
+        }
+      }
+    },
+    "notes": { "type": "array", "items": { "type": "string" } },
+    "next_steps": { "type": "array", "items": { "type": "string" } }
+  }
+}
+

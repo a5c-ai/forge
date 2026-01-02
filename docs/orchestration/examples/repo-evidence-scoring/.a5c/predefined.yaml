@@ -1,0 +1,13 @@
+cli:
+  echo:
+    description: "repo-evidence-scoring: local echo agent (writes output_last_message_path)"
+    cli_command: "node .a5c/agents/echo-agent.js"
+
+profiles:
+  default:
+    default: true
+    description: "repo-evidence-scoring default profile (echo)"
+    cli: echo
+    model: "fixture"
+    cli_params: "--prompt {{prompt_path}} --out {{output_last_message_path}}"
+

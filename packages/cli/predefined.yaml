@@ -1,0 +1,108 @@
+# Predefined CLI command templates for different AI providers
+cli:
+  custom:
+    cli_command: ""
+    description: "Custom CLI"
+    install: ""
+
+  claude_code:
+    cli_command: "cat {{prompt_path}} | claude --mcp-config {{mcp_config}} -p 'fulfill the request' --output-format stream-json --allowedTools Bash,Read,Glob,Grep,Write,MultiEdit,Edit,NotebookRead,NotebookEdit,WebFetch,TodoRead,TodoWrite,WebSearch,Task,Agent,mcp__github,mcp__agent_reporter --dangerously-skip-permissions --verbose --model {{model}}"
+    description: "Claude AI via claude-code CLI"
+    install: "npm install -g @anthropic-ai/claude-code"
+    stdin_enabled: false
+
+  # Added for parity with legacy action configs.
+  claude_code_bedrock:
+    cli_command: "cat {{prompt_path}} | CLAUDE_CODE_USE_BEDROCK=true claude --mcp-config {{mcp_config}} -p 'fulfill the request' --output-format stream-json --allowedTools Bash,Read,Glob,Grep,Write,MultiEdit,Edit,NotebookRead,NotebookEdit,WebFetch,TodoRead,TodoWrite,WebSearch,Task,Agent,mcp__github,mcp__agent_reporter --dangerously-skip-permissions --verbose --model {{model}}"
+    description: "Claude AI via claude-code CLI (AWS Bedrock)"
+    install: "npm install -g @anthropic-ai/claude-code"
+    stdin_enabled: false
+
+  claude_code_vertex:
+    cli_command: "cat {{prompt_path}} | CLOUD_ML_REGION=global CLAUDE_CODE_USE_VERTEX=1 claude --mcp-config {{mcp_config}} -p 'fulfill the request' --output-format stream-json --allowedTools Bash,Read,Glob,Grep,Write,MultiEdit,Edit,NotebookRead,NotebookEdit,WebFetch,TodoRead,TodoWrite,WebSearch,Task,Agent,mcp__github,mcp__agent_reporter --dangerously-skip-permissions --verbose --model {{model}}"
+    description: "Claude AI via claude-code CLI (Google Vertex)"
+    install: "npm install -g @anthropic-ai/claude-code"
+    stdin_enabled: false
+
+  codex:
+    cli_command: "cat {{prompt_path}} | codex exec --dangerously-bypass-approvals-and-sandbox -c model={{model}} --output-last-message {{output_last_message_path}}"
+    description: "OpenAI models via codex CLI"
+    install: "npm install -g @openai/codex@0.31.0"
+
+  jules:
+    envs:
+      GEMINI_API_KEY: "{{envs.GEMINI_API_KEY}}"
+    cli_command: "cat {{prompt_path}} | jules --model {{model}}"
+    description: "Google Gemini via official Gemini CLI"
+    install: "npm install -g @google/gemini"
+
+profiles:
+  openai_codex_gpt5:
+    default: true
+    cli: codex
+    description: "OpenAI via codex CLI"
+    model: "gpt-5-2025-08-07"
+
+  # Azure Codex profiles (Codex CLI configured to use Azure).
+  azure_codex_gpt5:
+    cli: codex
+    cli_params: "-c model_provider=azure -c model_providers.azure.name=azure -c model_providers.azure.wire_api=responses -c model_providers.azure.base_url=https://{{envs.AZURE_OPENAI_PROJECT_NAME}}.openai.azure.com/openai -c model_providers.azure.env_key=AZURE_OPENAI_API_KEY -c model_providers.azure.query_params.api-version=2025-04-01-preview"
+    model: "gpt-5-codex"
+    description: "Azure OpenAI via codex CLI"
+
+  azure_codex_gpt5_2:
+    cli: codex
+    cli_params: "-c model_provider=azure -c model_providers.azure.name=azure -c model_providers.azure.wire_api=responses -c model_providers.azure.base_url=https://{{envs.AZURE_OPENAI_PROJECT_NAME}}.openai.azure.com/openai -c model_providers.azure.env_key=AZURE_OPENAI_API_KEY -c model_providers.azure.query_params.api-version=2025-04-01-preview"
+    model: "gpt-5.2"
+    description: "Azure OpenAI via codex CLI"
+
+  azure_codex_model_router:
+    cli: codex
+    cli_params: "-c model_provider=azure -c model_providers.azure.name=azure -c model_providers.azure.wire_api=chat -c model_providers.azure.base_url=https://{{envs.AZURE_OPENAI_PROJECT_NAME}}.cognitiveservices.azure.com/openai -c model_providers.azure.env_key=AZURE_OPENAI_API_KEY -c model_providers.azure.query_params.api-version=2025-01-01-preview"
+    model: "model-router"
+    description: "Azure OpenAI via codex CLI with model-router"
+
+  github_codex_gpt5:
+    cli: codex
+    cli_params: "-c model_provider=github -c model_providers.github.name=github -c model_providers.github.wire_api=chat -c model_providers.github.base_url=https://models.github.ai/inference -c model_providers.github.env_key=GITHUB_TOKEN -c model_providers.github.query_params.api-version=2025-08-07"
+    model: "gpt-5-codex"
+    description: "GitHub Models via codex CLI"
+
+  claude_code_sonnet4:
+    cli: claude_code
+    model: "claude-sonnet-4-20250514"
+    description: "Claude Sonnet via claude-code CLI"
+
+  # Added for parity with legacy action configs.
+  claude_code_sonnet45:
+    cli: claude_code
+    model: "claude-sonnet-4-5-20250929"
+    description: "Claude Sonnet 4.5 via claude-code CLI"
+
+  claude_code_bedrock_sonnet45:
+    cli: claude_code_bedrock
+    model: "global.anthropic.claude-sonnet-4-5-20250929-v1:0"
+    description: "Claude Sonnet 4.5 via Bedrock (claude-code)"
+
+  claude_code_bedrock_opus45:
+    cli: claude_code_bedrock
+    model: "global.anthropic.claude-opus-4-5-20251101-v1:0"
+    description: "Claude Opus 4.5 via Bedrock (claude-code)"
+
+  claude_code_vertex_sonnet45:
+    cli: claude_code_vertex
+    model: "claude-sonnet-4-5@20250929"
+    description: "Claude Sonnet 4.5 via Vertex (claude-code)"
+
+  gemini_jules_25pro:
+    cli: jules
+    model: "gemini-2.5-pro"
+    description: "Google Gemini via official Gemini CLI"
+
+  custom_example1:
+    cli: custom
+    description: "my custom CLI example"
+    cli_command: "cat {{prompt_path}} | mycli run vllm-gpt-oss --model {{model}} --output-last-message {{output_last_message_path}}"
+    install: "npm install -g mycli"
+    model: "vllm-gpt-oss"
+

@@ -1,0 +1,45 @@
+template_id: evidence_scoring_min
+version: v1
+name: Evidence scoring
+description: Reward step computes reward report from evidence producers.
+steps:
+  - step_id: 1
+    name: Implement
+    type: agent
+    instructions: "noop"
+  - step_id: 2
+    name: Reward
+    type: reward
+    instructions: "run evidence"
+    reward:
+      signals: [unit, lint]
+      policy:
+        on_fail: pause
+      thresholds:
+        pass: 0.8
+
+signals:
+  unit:
+    severity: HARD
+    weight: 0.7
+    producer: unit_prod
+    producer_args:
+      cmd: "pnpm test"
+    scoring:
+      mode: pass_fail
+  lint:
+    severity: SOFT
+    weight: 0.3
+    producer: lint_prod
+    producer_args:
+      cmd: "pnpm lint"
+    scoring:
+      mode: pass_fail
+
+evidence_producers:
+  unit_prod:
+    kind: command
+    default_outputs: [unit_report]
+  lint_prod:
+    kind: command
+    default_outputs: [lint_report]

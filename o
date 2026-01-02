@@ -1,0 +1,187 @@
+#!/usr/bin/env node
+
+"use strict";
+
+const cp = require("node:child_process");
+const fs = require("node:fs");
+const os = require("node:os");
+const path = require("node:path");
+
+const DEFAULT_REGISTRY = "https://github.com/a5c-ai/o";
+
+function writeOut(line) {
+  process.stdout.write(`${line}\n`);
+}
+
+function writeErr(line) {
+  process.stderr.write(`${line}\n`);
+}
+
+function usage() {
+  writeOut("Usage:");
+  writeOut("  o init [--registry <path|url>]");
+  writeOut('  o "your request here"');
+  writeOut("  o help");
+}
+
+function isFlag(s) {
+  return typeof s === "string" && s.startsWith("-");
+}
+
+function isLikelyUrl(s) {
+  if (!s) return false;
+  if (/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(s)) return true;
+  if (s.startsWith("git@")) return true;
+  return false;
+}
+
+function copyDirRecursive(srcDir, dstDir) {
+  fs.mkdirSync(dstDir, { recursive: true });
+  const entries = fs.readdirSync(srcDir, { withFileTypes: true });
+  for (const entry of entries) {
+    const srcPath = path.join(srcDir, entry.name);
+    const dstPath = path.join(dstDir, entry.name);
+    if (entry.isDirectory()) copyDirRecursive(srcPath, dstPath);
+    else if (entry.isFile()) fs.copyFileSync(srcPath, dstPath);
+  }
+}
+
+function copyManagedFromRegistry(registryRoot, repoRoot) {
+  const srcFunctions = path.join(registryRoot, ".a5c", "functions");
+  const srcProcesses = path.join(registryRoot, ".a5c", "processes");
+  const srcTemplate = path.join(registryRoot, ".a5c", "o.md");
+
+  if (!fs.existsSync(srcFunctions) || !fs.statSync(srcFunctions).isDirectory()) {
+    throw Object.assign(new Error(`registry missing .a5c/functions: ${srcFunctions}`), { exitCode: 2 });
+  }
+  if (!fs.existsSync(srcProcesses) || !fs.statSync(srcProcesses).isDirectory()) {
+    throw Object.assign(new Error(`registry missing .a5c/processes: ${srcProcesses}`), { exitCode: 2 });
+  }
+
+  const dstFunctions = path.join(repoRoot, ".a5c", "functions");
+  const dstProcesses = path.join(repoRoot, ".a5c", "processes");
+  fs.mkdirSync(dstFunctions, { recursive: true });
+  fs.mkdirSync(dstProcesses, { recursive: true });
+
+  copyDirRecursive(srcFunctions, dstFunctions);
+  copyDirRecursive(srcProcesses, dstProcesses);
+
+  if (fs.existsSync(srcTemplate) && fs.statSync(srcTemplate).isFile()) {
+    const dstTemplate = path.join(repoRoot, ".a5c", "o.md");
+    fs.mkdirSync(path.dirname(dstTemplate), { recursive: true });
+    fs.copyFileSync(srcTemplate, dstTemplate);
+  }
+}
+
+function initCommand(argv) {
+  let registry = DEFAULT_REGISTRY;
+
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+
+    if (a === "--registry") {
+      const v = argv[i + 1];
+      if (!v || isFlag(v)) throw Object.assign(new Error("init: --registry requires a value"), { exitCode: 2 });
+      registry = v;
+      i++;
+      continue;
+    }
+
+    if (a === "-h" || a === "--help") {
+      usage();
+      return 0;
+    }
+
+    throw Object.assign(new Error(`init: unknown arg '${a}'`), { exitCode: 2 });
+  }
+
+  const repoRoot = process.cwd();
+  const resolvedPath = path.resolve(repoRoot, registry);
+  if (fs.existsSync(resolvedPath)) {
+    copyManagedFromRegistry(resolvedPath, repoRoot);
+    return 0;
+  }
+
+  if (!isLikelyUrl(registry)) {
+    throw Object.assign(new Error(`init: registry not found: ${registry}`), { exitCode: 2 });
+  }
+
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "a5c-o-registry-"));
+  try {
+    const res = cp.spawnSync("git", ["clone", "--depth", "1", registry, tmpDir], { stdio: "pipe", encoding: "utf8", windowsHide: true });
+    if (res.error) throw res.error;
+    if (res.status !== 0) {
+      const details = String(res.stderr || res.stdout || "").trim();
+      throw Object.assign(new Error(`init: failed to clone registry: ${details || `git exited ${res.status}`}`), { exitCode: 2 });
+    }
+    copyManagedFromRegistry(tmpDir, repoRoot);
+    return 0;
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+}
+
+function runRequest(argv) {
+  const request = argv.join(" ").trim();
+  if (!request) {
+    usage();
+    return 2;
+  }
+
+  const cmd = process.env.A5C_CLI_COMMAND;
+  if (!cmd) {
+    writeErr('error: A5C_CLI_COMMAND is not set (example: A5C_CLI_COMMAND="git a5c agent run")');
+    return 2;
+  }
+
+  const templatePath = path.join(process.cwd(), ".a5c", "o.md");
+  if (!fs.existsSync(templatePath)) {
+    writeErr(`error: missing template: ${templatePath} (run: o init)`);
+    return 2;
+  }
+
+  const template = fs.readFileSync(templatePath, "utf8");
+  const rendered = template.split("{{request}}").join(request);
+
+  const res = cp.spawnSync(cmd, {
+    shell: true,
+    stdio: ["pipe", "inherit", "inherit"],
+    input: rendered,
+    encoding: "utf8",
+    windowsHide: true
+  });
+  if (res.error) {
+    writeErr(`error: failed to run A5C_CLI_COMMAND: ${String(res.error?.message ?? res.error)}`);
+    return 1;
+  }
+  return typeof res.status === "number" ? res.status : 1;
+}
+
+function main() {
+  const argv = process.argv.slice(2);
+
+  try {
+    if (argv.length === 0) {
+      usage();
+      return 2;
+    }
+
+    const cmd = argv[0];
+    if (cmd === "help" || cmd === "-h" || cmd === "--help") {
+      usage();
+      return 0;
+    }
+
+    if (cmd === "init") {
+      return initCommand(argv.slice(1));
+    }
+
+    return runRequest(argv);
+  } catch (e) {
+    const exitCode = typeof e?.exitCode === "number" ? e.exitCode : 1;
+    writeErr(`error: ${String(e?.message ?? e)}`);
+    return exitCode === 2 ? 2 : 1;
+  }
+}
+
+process.exit(main());

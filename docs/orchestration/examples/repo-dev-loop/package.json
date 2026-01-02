@@ -1,0 +1,11 @@
+{
+  "name": "repo-dev-loop",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "node --test",
+    "lint": "node -c src/index.js && node -c test/index.test.js",
+    "test:ci": "npm run lint && npm run test"
+  }
+}
+
